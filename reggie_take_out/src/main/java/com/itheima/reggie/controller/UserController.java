@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/user")
@@ -29,6 +31,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 //默认通过类型注入，如存在多个类型则通过名称注入
+    @Autowired
+    private RedisTemplate redisTemplate;
     @Resource
     private JavaMailSender javaMailSender;//我们需要用这个进行邮件发送
     //注意这里我们将发送者从配置文件注入进来
@@ -66,7 +70,9 @@ public class UserController {
             //将生成的验证码保存到Session
             //将我们生成的手机号和验证码放到session里面，我们后面用户填入验证码之后，我们验证的时候就从这里去取然后进行比对
             //这里我们需要一个异常捕获
-            session.setAttribute(phone, code);
+            //session.setAttribute(phone, code);
+            //将生成的验证码缓存到Redis中，并且设置有效期为1分钟
+            redisTemplate.opsForValue().set(phone,code,1, TimeUnit.MINUTES);
             //return R_.success("手机验证码短信发送成功");
             try {
                 //javaMailSender.send(simpleMailMessage);
@@ -100,7 +106,10 @@ public class UserController {
         String phone = map.get("phone").toString();
         String code = map.get("code").toString();
 //获取session中phone字段对应的验证码
-        Object codeInSession = session.getAttribute(phone);
+//      Object codeInSession =session.getAttribute(phone);
+
+        //从Redis中获取缓存的验证码
+        Object codeInSession = redisTemplate.opsForValue().get(phone);
         //进行验证码的比对（页面提交的验证码和Session中保存的验证码比对）
         if(codeInSession != null && codeInSession.equals(code)){
             //如果能够比对成功，说明登录成功
@@ -117,6 +126,8 @@ public class UserController {
             }
 //          这里我们将user存储进去，后面各项操作，我们会用，其中拦截器那边会判断用户是否登录，所以我们将这个存储进去，
             session.setAttribute("user",user.getId());
+            //如果登录成功，删除Redis中缓存的验证码
+            redisTemplate.delete(phone);
             return R.success(user);
         }
         return R.error("登录失败");
