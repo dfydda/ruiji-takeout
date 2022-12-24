@@ -2,12 +2,16 @@ package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.DishFlavor;
+import com.itheima.reggie.entity.Setmeal;
+import com.itheima.reggie.entity.SetmealDish;
 import com.itheima.reggie.mapper.DishMapper;
 import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
+import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +29,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper,Dish> implements Dis
     @Autowired
     private DishFlavorService dishFlavorService;
 
+    @Autowired
+    private SetmealService setmealService;
 
     /**
      * 新增菜品，同时保存对应的口味数据
@@ -91,5 +98,45 @@ public class DishServiceImpl extends ServiceImpl<DishMapper,Dish> implements Dis
 
         dishFlavorService.saveBatch(flavors);
 
+    }
+
+    /**
+     * (批量)停售/起售菜品
+     * @param status
+     * @param ids
+     * @return
+     */
+    @Override
+    public Boolean updateStatus(Integer status, List<Long> ids) {
+        //业务逻辑：如果要停售则必须检查关联套餐是否停售
+        if(status == 0){
+            //根据菜品IDs获取其关联的套餐IDs
+            Set<Long> setmealIds = setmealService.getIdsByDishId(ids);
+            //如果该菜品关联的套餐IDs不为空，才继续进行下一步
+            if(!setmealIds.isEmpty()){
+                //创建setmeal的过滤条件封装器
+                LambdaQueryWrapper<Setmeal> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                //添加过滤条件：IN()套餐IDs
+                lambdaQueryWrapper.in(Setmeal::getId,setmealIds);
+                //添加过滤条件：在售套餐
+                lambdaQueryWrapper.eq(Setmeal::getStatus,1);
+                //如果满足的setmeal记录数大于0，则说明关联套餐在售，抛出业务异常
+                if(setmealService.count(lambdaQueryWrapper)>0){
+                    throw new CustomException("停售失败，菜品所关联套餐仍在出售，请停售相关套餐");
+                }
+            }
+        }
+
+        //目的：尽量减少与MySQL通信的次数
+        //1.根据菜品ID集合批量查询菜品
+        List<Dish> dishes = this.listByIds(ids);
+
+        //2.使用集合的stream流修改售卖状态
+        dishes = dishes.stream().peek(dish ->{
+            dish.setStatus(status);
+        }).collect(Collectors.toList());
+
+        //3.批量update
+        return this.updateBatchById(dishes);
     }
 }

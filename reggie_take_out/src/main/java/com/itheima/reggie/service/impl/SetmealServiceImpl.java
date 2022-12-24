@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +42,23 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper,Setmeal> imple
 
         //保存套餐和菜品的关联信息，操作setmeal_dish,执行insert操作
         setmealDishService.saveBatch(setmealDishes);
+    }
+
+    /**
+     *  根据菜品IDs集合，查询对应套餐Ids集合
+     * @param dishIds
+     * @return
+     */
+    @Override
+    public Set<Long> getIdsByDishId(List<Long> dishIds) {
+        //1.创建setmeal_dish的过滤条件封装器
+        LambdaQueryWrapper<SetmealDish> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        //2.添加过滤条件：IN()
+        lambdaQueryWrapper.in(SetmealDish::getDishId, dishIds);
+        //3.查询对应的SetmealDish实体类集合
+        List<SetmealDish> setmealDishes = setmealDishService.list(lambdaQueryWrapper);
+        //4.获取其setmealId的去重集合：set集合是无序不可重复的
+        return setmealDishes.stream().map(SetmealDish::getSetmealId).collect(Collectors.toSet());
     }
 
     /**

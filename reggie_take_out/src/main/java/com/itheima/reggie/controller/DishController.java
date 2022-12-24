@@ -214,4 +214,19 @@ public class DishController {
 
         return R.success(dishDtoList);
     }
+
+    /**
+     * （批量)停售/起售菜品
+     * @param status
+     * @param ids
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    public R<String> updateStatus(@PathVariable Integer status,@RequestParam List<Long> ids){
+
+        if(dishService.updateStatus(status,ids)){
+            return R.success("修改状态成功");
+        }
+        return R.error("修改状态失败");
+    }
 }
