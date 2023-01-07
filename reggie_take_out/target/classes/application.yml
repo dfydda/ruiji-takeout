@@ -35,7 +35,13 @@ spring:
           socketFactoryClass: javax.net.ssl.SSLSocketFactory
           #开启debug以后，邮件发送过程的日志会在控制台上打印出来
         debug: false
-
+#热部署
+  devtools:
+    restart:
+      #不参与热部署的文件目录
+      exclude: backend/**,front/**
+      #关闭热部署
+      enabled: false
 
 mybatis-plus:
   configuration:

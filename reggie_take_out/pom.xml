@@ -97,6 +97,14 @@
       <artifactId>spring-boot-starter-cache</artifactId>
     </dependency>
 
+    <!--启动热部署工具-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <optional>true</optional><!--这个需要为true热部署才有效-->
+    </dependency>
+
+
   </dependencies>
 
   <build>
@@ -105,6 +113,10 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>2.4.5</version>
+        <configuration>
+          <fork>true</fork>
+          <addResources>true</addResources>
+        </configuration>
       </plugin>
     </plugins>
   </build>

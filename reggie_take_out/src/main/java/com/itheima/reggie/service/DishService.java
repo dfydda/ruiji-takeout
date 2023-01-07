@@ -19,4 +19,7 @@ public interface DishService extends IService<Dish> {
 
     //(批量)停售/起售菜品
     Boolean updateStatus(Integer status, List<Long> ids);
+
+    //根据传过来的id批量或者是单个的删除菜品
+    void deleteByIds(List<Long> ids);
 }
