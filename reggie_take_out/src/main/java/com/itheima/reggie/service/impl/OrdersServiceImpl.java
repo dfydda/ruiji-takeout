@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implements OrderService {
+public class OrdersServiceImpl extends ServiceImpl<OrderMapper, Orders> implements OrdersService {
 
     @Autowired
     private ShoppingCartService shoppingCartService;
@@ -105,4 +105,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         //清空购物车数据
         shoppingCartService.remove(wrapper);
     }
+
+
 }

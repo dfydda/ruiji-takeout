@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -75,7 +76,7 @@ public class UserController {
             redisTemplate.opsForValue().set(phone,code,1, TimeUnit.MINUTES);
             //return R_.success("手机验证码短信发送成功");
             try {
-                //javaMailSender.send(simpleMailMessage);
+                //javaMailSender.send(simpleMailMessage);//发送验证码
                 return R.success("手机验证码短信发送成功");
             } catch (MailException e) {
                 e.printStackTrace();
@@ -131,5 +132,16 @@ public class UserController {
             return R.success(user);
         }
         return R.error("登录失败");
+    }
+
+    /**
+     * 移动端用户退出登录
+     * @return
+     */
+    @PostMapping("/loginout")
+    public R<String> logout(HttpServletRequest request){
+        //清理session中的用户id
+        request.getSession().removeAttribute("user");
+        return R.success("退出成功");
     }
 }

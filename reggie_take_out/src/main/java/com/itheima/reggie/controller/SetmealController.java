@@ -6,6 +6,7 @@ import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Setmeal;
+import com.itheima.reggie.entity.SetmealDish;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.SetmealDishService;
 import com.itheima.reggie.service.SetmealService;
@@ -123,10 +124,66 @@ public class SetmealController {
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(setmeal.getCategoryId() != null,Setmeal::getCategoryId,setmeal.getCategoryId());
         queryWrapper.eq(setmeal.getStatus() != null,Setmeal::getStatus,setmeal.getStatus());
-        queryWrapper.orderByDesc(Setmeal::getUpdateTime);
+        queryWrapper.orderByDesc(Setmeal::getUpdateTime);//排序
 
         List<Setmeal> list = setmealService.list(queryWrapper);
 
         return R.success(list);
     }
+
+    /**
+     *回显套餐数据：根据套餐id查询套餐
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<SetmealDto> getData(@PathVariable Long id){
+        SetmealDto setmealDto =setmealService.getData(id);
+
+        return R.success(setmealDto);
+    }
+
+    /**
+     * 套餐修改
+     * @param setmealDto
+     * @return
+     */
+    @PutMapping
+    public R<String> edit(@RequestBody SetmealDto setmealDto)
+    {
+        //先判断是否接收到数据
+        if(setmealDto==null)
+        {
+            return  R.error("请求异常");
+        }
+        //判断套餐下面是否还有关联菜品
+        if(setmealDto.getSetmealDishes()==null)
+        {
+            return R.error("套餐没有菜品，请添加");
+        }
+        //获取到关联的菜品列表，注意关联菜品的列表使我们提交过来的
+        List<SetmealDish> setmealDishes = setmealDto.getSetmealDishes();
+        //获取到套餐的id
+        Long setmealId = setmealDto.getId();
+        //构造关联菜品的条件查询
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        //根据套餐id在关联菜品中查询数据，注意这里所做的查询是在数据库中进行查询的
+        queryWrapper.eq(SetmealDish::getSetmealId,setmealId);
+        //关联菜品先移除掉原始数据库中的数据
+        setmealDishService.remove(queryWrapper);
+        //为setmeal_dish表填充相关的属性
+        //这里我们需要为关联菜品的表前面的字段填充套餐的id
+        for(SetmealDish setmealDish:setmealDishes)
+        {
+            setmealDish.setSetmealId(setmealId);//填充属性值
+        }
+        //批量把setmealDish保存到setmeal_dish表
+        //这里我们保存了我们提交过来的关联菜品数据
+        setmealDishService.saveBatch(setmealDishes);//保存套餐关联菜品
+        //这里我们正常更新套餐
+        setmealService.updateById(setmealDto);//保存套餐
+        return R.success("套餐修改成功");
+
+    }
+
+
 }

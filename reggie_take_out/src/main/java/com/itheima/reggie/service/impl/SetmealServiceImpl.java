@@ -10,6 +10,7 @@ import com.itheima.reggie.mapper.SetmealMapper;
 import com.itheima.reggie.service.SetmealDishService;
 import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,4 +89,34 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper,Setmeal> imple
         //删除关系表中的数据----setmeal_dish
         setmealDishService.remove(lambdaQueryWrapper);
     }
+
+    /**
+     * 回显套餐数据：根据套餐id查询套餐
+     * @return
+     */
+    @Override
+     public SetmealDto getData(Long id) {
+        //因为前端给到我们的字段就是id，我们先根据这个id去查询具体的套餐
+        Setmeal setmeal =this.getById(id);//根据id查询到套餐
+        //构造扩展出来的setmealDto对象
+        //最后我们会将所有的数据封装到setmealDto当中
+        SetmealDto setmealDto = new SetmealDto();
+        //构造菜品套餐关联的条件查询
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        //根据套餐来查询菜品
+        queryWrapper.eq(id!=null,SetmealDish::getSetmealId,id);//这里根据套餐id查询关联的菜品
+        if (setmeal!=null)//查询到的套餐不是空
+        {
+//            拷贝一下数据
+            BeanUtils.copyProperties(setmeal,setmealDto);//先将套餐的的数据字段拷贝到扩展的实体类
+            //这里具体对关联的菜品进行了查询
+            List<SetmealDish> list = setmealDishService.list(queryWrapper);//这是查询到的菜品数据
+
+            setmealDto.setSetmealDishes(list);//将菜品数据传过去
+            return setmealDto;
+        }
+
+        return null;
+    }
+
 }
