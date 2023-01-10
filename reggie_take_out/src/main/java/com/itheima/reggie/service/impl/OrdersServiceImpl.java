@@ -106,5 +106,13 @@ public class OrdersServiceImpl extends ServiceImpl<OrderMapper, Orders> implemen
         shoppingCartService.remove(wrapper);
     }
 
+    //抽离的一个方法，通过订单id查询订单明细，得到一个订单明细的集合
+    //这里抽离出来是为了避免在stream中遍历的时候直接使用构造条件来查询导致eq叠加，从而导致后面查询的数据都是null
+    public List<OrderDetail> getOrderDetailListByOrderId(Long orderId){
+        LambdaQueryWrapper<OrderDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderDetail::getOrderId,orderId);
+        List<OrderDetail> orderDetailList = orderDetailService.list();
+        return orderDetailList;
+    }
 
 }
