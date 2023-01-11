@@ -52,4 +52,4 @@ mybatis-plus:
     db-config:
       id-type: ASSIGN_ID
 reggie:
-  path: C:\Users\Administrator\Desktop\Application Development\reggie_take_out\img\
+  path: C:\Users\Administrator\Desktop\Application Development\ruiji-takeout\reggie_take_out\img\
