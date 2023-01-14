@@ -63,7 +63,11 @@
             {{ String(scope.row.status) === '0' ? '已禁用' : '正常' }}
           </template>
         </el-table-column>
+        <!--增加对管理员的判断
+            v-if="user === 'admin'"
+           -->
         <el-table-column
+          v-if="user === 'admin'"
           label="操作"
           width="160"
           align="center"
@@ -89,6 +93,15 @@
             </el-button>
           </template>
         </el-table-column>
+
+        <el-button
+                v-if="user === 'admin'"
+                type="primary"
+                @click="addMemberHandle('add')"
+        >
+          + 添加员工
+        </el-button>
+
       </el-table>
       <el-pagination
         class="pageList"
