@@ -45,6 +45,15 @@
             maxlength="20"
           />
         </el-form-item>
+
+        <el-form-item label="密码:" prop="password">
+          <el-input
+                  v-model="ruleForm.password"
+                  placeholder="请输入密码"
+                  maxlength="20"
+          />
+        </el-form-item>
+
         <el-form-item
           label="性别:"
           prop="sex"
@@ -116,16 +125,22 @@
         },
         computed: {
           rules () {
+
+            const validatePassword = (rule, value, callback) => {
+              if (value.length < 6) {
+                callback(new Error('密码必须在6位以上'))
+              } else {
+                callback()
+              }
+            }
+
             return {
               //账号
-              username: [
-                {
-                  required: true, 'validator': checkUserName, trigger: 'blur'
-                }
-              ],
+              username: [{ required: true, 'validator': checkUserName, trigger: 'blur' }],
               //姓名
               name: [{ required: true, 'validator': checkName, 'trigger': 'blur' }],
               'phone': [{ 'required': true, 'validator': checkPhone, 'trigger': 'blur' }],
+              'password': [{ 'validator': validatePassword, 'trigger': 'blur' }],
               'idNumber': [{ 'required': true, 'validator': validID, 'trigger': 'blur' }]
             }
           }
