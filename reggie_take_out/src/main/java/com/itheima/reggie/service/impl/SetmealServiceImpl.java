@@ -119,4 +119,23 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper,Setmeal> imple
         return null;
     }
 
+    /**
+     * 根据套餐id修改售卖状态
+     * @param status
+     * @param ids
+     */
+    @Override
+    public void updateSetmealStatusById(Integer status,  List<Long> ids) {
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.in(ids !=null,Setmeal::getId,ids);
+        List<Setmeal> list = this.list(queryWrapper);
+
+        for (Setmeal setmeal : list) {
+            if (setmeal != null){
+                setmeal.setStatus(status);
+                this.updateById(setmeal);
+            }
+        }
+    }
+
 }

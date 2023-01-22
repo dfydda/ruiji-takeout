@@ -31,17 +31,27 @@
         </div>
         <div class="divContent">
             <div class="divLinks">
+
+                <div class="item" @click="toEdituserPage">
+                    <img src="./../images/user1.png"/>
+                    <span>用户信息管理</span>
+                    <i class="el-icon-arrow-right"></i>
+                </div>
+                <div class="divSplit"></div>
+
                 <div class="item" @click="toAddressPage">
                     <img src="./../images/locations.png"/>
                     <span>地址管理</span>
                     <i class="el-icon-arrow-right"></i>
                 </div>
                 <div class="divSplit"></div>
+
                 <div class="item" @click="toOrderPage">
                     <img src="./../images/orders.png"/>
                     <span>历史订单</span>
                     <i class="el-icon-arrow-right"></i>
                 </div>
+
             </div>
             <div class="divOrders" v-if="order[0]">
                 <div class="title">最新订单</div>
@@ -113,6 +123,11 @@
             methods:{
                 goBack(){
                     history.go(-1)
+                },
+                toEdituserPage(){
+                    window.requestAnimationFrame(()=>{
+                        window.location.href = 'user-edit.html'
+                    })
                 },
                 toAddressPage(){
                     window.requestAnimationFrame(()=>{

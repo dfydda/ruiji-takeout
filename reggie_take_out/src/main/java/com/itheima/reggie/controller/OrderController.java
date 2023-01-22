@@ -92,7 +92,7 @@ public class OrderController {
         //这里是直接把当前用户分页的全部结果查询出来，要添加用户id作为查询条件，
         // 否则会出现用户可以查询到其他用户的订单情况
 
-        //添加排序条件，根据更新时间降序排列
+        //根据更新时间降序排列
         queryWrapper.orderByDesc(Orders::getOrderTime);
         ordersService.page(pageInfo,queryWrapper);
 
@@ -117,6 +117,12 @@ public class OrderController {
         pageDto.setRecords(orderDtoList);
         return R.success(pageDto);
     }
+
+    /**
+     * 再来一单
+     * @param map
+     * @return
+     */
     @PostMapping("/again")
     public R<String> againSubmit(@RequestBody Map<String,String> map){
         String ids = map.get("id");
@@ -158,6 +164,12 @@ public class OrderController {
 
         return R.success("操作成功");
     }
+
+    /**
+     * 修改订单状态
+     * @param map
+     * @return
+     */
     @PutMapping
     public R<String> orderStatusChange(@RequestBody Map<String,String> map){
 

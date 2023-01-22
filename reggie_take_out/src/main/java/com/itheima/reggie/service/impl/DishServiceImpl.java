@@ -142,7 +142,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper,Dish> implements Dis
     }
 
     /**
-     * 套餐批量删除和单个删除
+     * 菜品批量删除和单个删除
      * @param ids
      */
     @Override

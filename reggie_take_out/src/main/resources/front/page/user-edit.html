@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=no,minimal-ui">
+    <title>菩提阁</title>
+    <link rel="icon" href="./../images/favico.ico">
+    <!--不同屏幕尺寸根字体设置-->
+    <script src="./../js/base.js"></script>
+    <!--element-ui的样式-->
+    <link rel="stylesheet" href="../../backend/plugins/element-ui/index.css" />
+    <!--引入vant样式-->
+    <link rel="stylesheet" href="../styles/vant.min.css"/>
+    <!-- 引入样式  -->
+    <link rel="stylesheet" href="../styles/index.css" />
+    <!--本页面内容的样式-->
+    <link rel="stylesheet" href="./../styles/user-edit.css" />
+</head>
+<body>
+<div id="user_edit" class="app">
+    <div class="divHead">
+        <div class="divTitle">
+            <i class="el-icon-arrow-left" @click="goBack"></i>{{title}}
+        </div>
+    </div>
+    <div class="divContent">
+
+        <div class="divItem">
+            <span>用户名：</span>
+            <el-input
+                    placeholder=" 请填写用户姓名"
+                    v-model="form.consignee"
+                    maxlength='10'
+            /></el-input>
+
+        </div>
+
+        <div class="divItem">
+             <span
+                     class="spanChecked"
+                     @click="form.sex = '1'">
+                    <i :class="{iActive:form.sex === '1'}"></i>
+                    先生
+                   </span>
+            <span class="spanChecked" @click="form.sex = '0'">
+                    <i :class="{iActive:form.sex === '0'}"></i>
+                    女士
+                </span>
+        </div>
+
+        <div class="divItem">
+            <span>身份证号：</span>
+            <el-input
+                    placeholder=" 请填写身份证号"
+                    v-model="form.idNumber"
+                    maxlength='20'
+            /></el-input>
+        </div>
+        <div class="divItem">
+            <span>头像上传：</span>
+            <el-upload
+                    class="avatar-uploader"
+                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :show-file-list="false"
+                    :on-success="handleAvatarSuccess"
+                    :before-upload="beforeAvatarUpload">
+                <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
+        </div>
+
+        <div class="divSave" @click="saveUser">保存信息</div>
+        <div class="divDelete" @click="deleteUser" v-if="id">删除信息</div>
+    </div>
+</div>
+<!-- 开发环境版本,包含了有帮助的命令行警告 -->
+<script src="../../backend/plugins/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../backend/plugins/element-ui/index.js"></script>
+<!-- 引入vant样式 -->
+<script src="./../js/vant.min.js"></script>
+<script src="./../js/common.js"></script>
+<script src="./../api/address.js"></script>
+<!-- 引入axios -->
+<script src="../../backend/plugins/axios/axios.min.js"></script>
+<script src="./../js/request.js"></script>
+<script>
+    new Vue({
+        el:"#user_edit",
+        data(){
+            return {
+                title:'用户信息修改',
+                form: {
+                    consignee:'',//用户名
+                    sex:'1',//0表示女 1 表示男
+                    idNumber:'',//身份证号
+                    imageUrl: ''//图片上传
+                }
+            }
+        },
+        computed:{},
+        created(){
+            this.initData()
+        },
+        mounted(){
+        },
+        methods:{
+            goBack(){
+                history.go(-1)
+            },
+            async initData(){
+                const params = parseUrl(window.location.search)
+                this.id = params.id
+                if(params.id){
+                    this.title = '编辑用户信息'
+                    const res = await userFindOneApi(params.id)
+                    if(res.code === 1){
+                        this.form = res.data
+                    }else{
+                        this.$notify({ type:'warning', message:res.msg});
+                    }
+                }
+            },
+            async saveUser(){
+                const form = this.form
+                if(!form.consignee){
+                    this.$notify({ type:'warning', message:'请输入用户姓名'});
+                    return
+                }
+                if(!form.idNumber){
+                    this.$notify({ type:'warning', message:'请输入身份证号'});
+                    return
+                }
+
+                let res= {}
+                if(this.id){
+                    res = await updateUserApi(this.form)
+                }else{
+                    res = await addUserApi(this.form)
+                }
+
+                if(res.code === 1){
+                    window.requestAnimationFrame(()=>{
+                        window.location.replace('/front/page/user-edit.html')
+                    })
+                }else{
+                    this.$notify({ type:'warning', message:res.msg});
+                }
+            },
+            deleteUser(){
+                this.$dialog.confirm({
+                    title: '确认删除',
+                    message: '确认删除当前信息？',
+                })
+                    .then( async () => {
+                        const res = await deleteUserApi({ids:this.id })
+                        if(res.code === 1){
+                            window.requestAnimationFrame(()=>{
+                                window.location.replace('/front/page/user-edit.html')
+                            })
+                        }else{
+                            this.$notify({ type:'warning', message:res.msg});
+                        }
+                    })
+                    .catch(() => {
+                    });
+            },
+
+            handleAvatarSuccess(res, file) {
+                this.imageUrl = URL.createObjectURL(file.raw);
+            },
+            beforeAvatarUpload(file) {
+                const isJPG = file.type === 'image/jpeg';
+                const isLt2M = file.size / 1024 / 1024 < 2;
+
+                if (!isJPG) {
+                    this.$message.error('上传头像图片只能是 JPG 格式!');
+                }
+                if (!isLt2M) {
+                    this.$message.error('上传头像图片大小不能超过 2MB!');
+                }
+                return isJPG && isLt2M;
+            }
+        }
+    })
+</script>
+</body>
+</html>
