@@ -13,10 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -47,7 +44,7 @@ public class UserController {
      */
     @PostMapping("/sendMsg")
     private R<String> sendMsg(@RequestBody User user, HttpSession session){
-        //这里用163邮箱去发送验证码
+        //用163邮箱去发送验证码
         //获取到前端提交过来的邮箱帐号
         String phone = user.getPhone();
         //这里工具类判是否为空
@@ -67,7 +64,6 @@ public class UserController {
             //设置邮件的征文
             String text = "验证码测试，验证码为" + code + "是否收到";
             simpleMailMessage.setText(text);
-
             //将生成的验证码保存到Session
             //将我们生成的手机号和验证码放到session里面，我们后面用户填入验证码之后，我们验证的时候就从这里去取然后进行比对
             //这里我们需要一个异常捕获
@@ -82,7 +78,6 @@ public class UserController {
                 e.printStackTrace();
             }
         }
-
         return R.error("短信发送失败");
     }
 
@@ -108,7 +103,6 @@ public class UserController {
         String code = map.get("code").toString();
 //获取session中phone字段对应的验证码
 //      Object codeInSession =session.getAttribute(phone);
-
         //从Redis中获取缓存的验证码
         Object codeInSession = redisTemplate.opsForValue().get(phone);
         //进行验证码的比对（页面提交的验证码和Session中保存的验证码比对）
@@ -143,5 +137,57 @@ public class UserController {
         //清理session中的用户id
         request.getSession().removeAttribute("user");
         return R.success("退出成功");
+    }
+
+    /**
+     * 根据id查询用户信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<User> getId(@PathVariable Long id){
+        log.info("根据id查询用户信息...");
+        User user = userService.getById(id);
+        if(user != null){
+            return R.success(user);
+        }
+        return R.error("操作失败");
+    }
+
+    /**
+     * 根据id修改用户信息
+     * @param user
+     * @return
+     */
+    @PutMapping
+    public R<String> update(HttpServletRequest request,@RequestBody User user){
+        log.info(user.toString());
+
+        long id = Thread.currentThread().getId();
+        log.info("线程id为: {}",id);
+        userService.updateById(user);
+        return R.success("用户信息修改成功");
+    }
+
+    /**
+     * 新增用户
+     * @param user
+     * @return
+     */
+    @PostMapping
+    public R<String> add(@RequestBody User user){
+        log.info(user.toString());
+        userService.save(user);
+        return R.success("添加成功");
+    }
+
+    /**
+     *
+     * @return
+     */
+    @DeleteMapping
+    public R<String> detele(@RequestBody Long id){
+        userService.removeById(id);
+        return R.success("删除成功");
     }
 }
