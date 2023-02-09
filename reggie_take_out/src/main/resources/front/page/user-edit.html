@@ -83,6 +83,7 @@
 <script src="./../api/address.js"></script>
 <!-- 引入axios -->
 <script src="../../backend/plugins/axios/axios.min.js"></script>
+<script src="./../api/user-edit.js"></script>
 <script src="./../js/request.js"></script>
 <script>
     new Vue({
@@ -99,7 +100,15 @@
                 imageUrl:''
             }
         },
-        computed:{},
+        computed:{
+            rules () {
+                return {
+                    consignee: [{ required: true, message: "请输入用户名称", 'trigger': 'blur' }],
+                    idNumber: [{ required: true, message: "请输入身份证号", 'trigger': 'blur' }],
+                    imageUrl: [{required: true, message: "请上传图片", 'trigger': 'blur'}]
+                }
+                }
+        },
         created(){
             this.initData()
         },
@@ -122,49 +131,36 @@
                     }
                 }
             },
-            async saveUser(){
-                const form = this.form
-                if(!form.consignee){
-                    this.$notify({ type:'warning', message:'请输入用户姓名'});
-                    return
-                }
-                if(!form.idNumber){
-                    this.$notify({ type:'warning', message:'请输入身份证号'});
-                    return
-                }
-
-                let res= {}
-                if(this.id){
-                     res = await updateUserApi(this.form)
-                 }
-                if(res.code === 1){
-                    window.requestAnimationFrame(()=>{
-                        window.location.replace('/front/page/user.html')
-                    })
-                }else{
-                    this.$notify({ type:'warning', message:res.msg});
-                }
-            },
-
-            deleteAddress(){
-                this.$dialog.confirm({
-                    title: '确认删除',
-                    message: '确认要删除当前信息吗？',
-                })
-                    .then( async () => {
-                        const res = await deleteAddressApi({ids:this.id })
-                        if(res.code === 1){
-                            window.requestAnimationFrame(()=>{
-                                window.location.replace('/front/page/address.html')
+            async saveUser(st){
+                        let params = {...this.form}
+                        // params.flavors = this.dishFlavors
+                        params.sex = this.form ? 1 : 0
+                        params.name = this.form.consignee
+                        params.idNumber = this.form.idNumber
+                        params.image = this.imageUrl
+                            updateUserApi(params).then(res => {
+                                if (res.code === 1) {
+                                    this.$message.success('用户信息添加成功！')
+                                    window.location.href = '/front/index.html'
+                                    if (!st) {
+                                        this.goBack()
+                                    } else {
+                                        this. form = {
+                                                consignee:'',//用户名
+                                                sex:'1',//0表示女 1 表示男
+                                                idNumber:'',//身份证号
+                                                image:''//图片上传
+                                        }
+                                        this.imageUrl = ''
+                                    }
+                                } else {
+                                    this.$message.error(res.msg || '操作失败')
+                                }
+                            }).catch(err => {
+                                this.$message.error('请求出错了：' + err)
                             })
-                        }else{
-                            this.$notify({ type:'warning', message:res.msg});
-                        }
-                    })
-                    .catch(() => {
-                    });
             },
-
+            //图片上传发送后端请求
             handleAvatarSuccess (response, file, fileList) {
                 this.imageUrl = `/common/download?name=${response.data}`},
             beforeUpload (file) {

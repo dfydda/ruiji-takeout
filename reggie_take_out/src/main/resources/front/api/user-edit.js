@@ -1,13 +1,4 @@
 
-function  addUserApi(data){
-    return $axios({
-        'url': '/user',
-        'method': 'post',
-        data
-    })
-}
-
-
 function  updateUserApi(data){
     return $axios({
         'url': '/user',
@@ -15,16 +6,6 @@ function  updateUserApi(data){
         data
     })
 }
-
-
-function deleteUserApi(params) {
-    return $axios({
-        'url': '/user',
-        'method': 'delete',
-        params
-    })
-}
-
 
 function userFindOneApi(id) {
     return $axios({

@@ -48,6 +48,15 @@ function checkPhone (rule, value, callback){
   }
 }
 
+function validatePassword (rule, value, callback){
+  if (value == "") {
+    callback(new Error("请输入密码"))
+  }else if (value.length < 6) {
+    callback(new Error('密码必须在6位以上'))
+  } else {
+    callback()
+  }
+}
 
 function validID (rule,value,callback) {
   // 身份证号码为15位或者18位，15位时全为数字，18位前17位为数字，最后一位是校验位，可能为数字或字符X

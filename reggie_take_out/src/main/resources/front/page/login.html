@@ -126,7 +126,7 @@
                             sessionStorage.setItem("userPhone", this.form.phone)
                             window.requestAnimationFrame(() => {
                                 this.$notify({type: 'success', message: res.data})
-                                window.location.href = '/front/index.html'
+                                window.location.href = '/front/user.html'
                             })
                         } else {
                             this.$notify({type: 'warning', message: res.msg});

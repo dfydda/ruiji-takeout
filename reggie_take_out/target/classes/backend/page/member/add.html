@@ -63,10 +63,7 @@
             <el-radio label="女"></el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item
-          label="身份证号:"
-          prop="idNumber"
-        >
+        <el-form-item label="身份证号:" prop="idNumber">
           <el-input
             v-model="ruleForm.idNumber"
             placeholder="请输入身份证号"
@@ -117,6 +114,7 @@
             ruleForm : {
                 'name': '',
                 'phone': '',
+                'password':'123456',
                 'sex': '男',
                 'idNumber': '',
                 username: ''
@@ -125,22 +123,13 @@
         },
         computed: {
           rules () {
-
-            const validatePassword = (rule, value, callback) => {
-              if (value.length < 6) {
-                callback(new Error('密码必须在6位以上'))
-              } else {
-                callback()
-              }
-            }
-
             return {
               //账号
               username: [{ required: true, 'validator': checkUserName, trigger: 'blur' }],
               //姓名
               name: [{ required: true, 'validator': checkName, 'trigger': 'blur' }],
               'phone': [{ 'required': true, 'validator': checkPhone, 'trigger': 'blur' }],
-              'password': [{ 'validator': validatePassword, 'trigger': 'blur' }],
+              'password': [{ 'required': true,'validator': validatePassword, 'trigger': 'blur' }],
               'idNumber': [{ 'required': true, 'validator': validID, 'trigger': 'blur' }]
             }
           }
@@ -186,7 +175,7 @@
                           username: '',
                           'name': '',
                           'phone': '',
-                          // 'password': '',
+                          'password': '',
                           // 'rePassword': '',/
                           'sex': '男',
                           'idNumber': ''
