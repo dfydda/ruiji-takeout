@@ -34,7 +34,19 @@
   margin-left: 10rem;
   margin-right: 10rem;
 }
-
+#login .divContainer .count {
+  position: absolute;
+  right: 20rem;
+  top: 20rem;
+  cursor: pointer;
+  opacity: 1;
+  font-size: 12rem;
+  font-family: PingFangSC, PingFangSC-Regular;
+  font-weight: 400;
+  text-align: left;
+  color: #D8D8D8;	/*浅灰色*/
+  letter-spacing: 0px;
+}
 #login .divContainer span {
   position: absolute;
   right: 20rem;

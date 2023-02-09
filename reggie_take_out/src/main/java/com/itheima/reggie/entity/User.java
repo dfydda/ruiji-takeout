@@ -24,7 +24,7 @@ public class User implements Serializable {
     //身份证号
     private String idNumber;
     //头像
-    private String avatar;
+    private String image;
 
     //状态 0:禁用，1:正常
     private Integer status;
