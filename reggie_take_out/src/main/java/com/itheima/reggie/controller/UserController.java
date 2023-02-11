@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -165,11 +166,10 @@ public class UserController {
      * @return
      */
     @PutMapping
-    public R<String> update(HttpServletRequest request, @RequestBody User user) {
+    public R<String> update(HttpServletRequest request,@RequestBody User user) {
         log.info(user.toString());
-
-        long id = Thread.currentThread().getId();
-        log.info("线程id为: {}", id);
+        long id =(long)request.getSession().getAttribute("user");
+        user.setId(id);
         userService.updateById(user);
         return R.success("用户信息修改成功");
     }

@@ -141,7 +141,7 @@
                             updateUserApi(params).then(res => {
                                 if (res.code === 1) {
                                     this.$message.success('用户信息添加成功！')
-                                    window.location.href = '/front/index.html'
+                                    window.location.href= '/front/page/user.html'
                                     if (!st) {
                                         this.goBack()
                                     } else {

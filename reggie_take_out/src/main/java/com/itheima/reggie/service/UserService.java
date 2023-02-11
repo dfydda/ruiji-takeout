@@ -6,4 +6,5 @@ import com.itheima.reggie.entity.User;
 import javax.servlet.http.HttpSession;
 
 public interface UserService extends IService<User> {
+
 }
