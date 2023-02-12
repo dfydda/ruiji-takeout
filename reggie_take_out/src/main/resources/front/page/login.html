@@ -126,6 +126,7 @@
                             sessionStorage.setItem("userPhone", this.form.phone)
                             window.requestAnimationFrame(() => {
                                 this.$notify({type: 'success', message: res.data})
+		                        //this.$notify({type: 'success', message:"欢迎光临"})
                                 window.location.href = '/front/index.html'
                             })
                         } else {

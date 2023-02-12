@@ -133,7 +133,21 @@
             },
             async saveUser(st){
                         let params = {...this.form}
-                        // params.flavors = this.dishFlavors
+                if(!params.name){
+                    this.$notify({ type:'warning', message:'请输入用户姓名'});
+                    return
+                }
+
+                const reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/
+                if(!reg.test(params.idNumber)){
+                    this.$notify({ type:'warning', message:'身份证号码不合法'});
+                    return
+                }
+
+                if(!this.imageUrl){
+                    this.$message.error('请上传用户头像')
+                    return
+                }
                         params.sex = this.form ? 1 : 0
                         params.name = this.form.consignee
                         params.idNumber = this.form.idNumber
