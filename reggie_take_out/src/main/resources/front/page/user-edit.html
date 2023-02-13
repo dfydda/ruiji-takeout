@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=no,minimal-ui">
-    <title>菩提阁</title>
+    <title>城科餐厅</title>
     <link rel="icon" href="./../images/favico.ico">
     <!--不同屏幕尺寸根字体设置-->
     <script src="./../js/base.js"></script>
@@ -29,8 +29,7 @@
         <div class="divItem">
             <span>用户名：</span>
             <el-input
-                    placeholder=" 请填写用户姓名"
-                    v-model="form.consignee"
+                    v-model="form.name"
                     maxlength='10'
             /></el-input>
 
@@ -52,7 +51,6 @@
         <div class="divItem">
             <span>身份证号：</span>
             <el-input
-                    placeholder=" 请填写身份证号"
                     v-model="form.idNumber"
                     maxlength='20'
             /></el-input>
@@ -85,6 +83,7 @@
 <script src="../../backend/plugins/axios/axios.min.js"></script>
 <script src="./../api/user-edit.js"></script>
 <script src="./../js/request.js"></script>
+<script src="../../backend/js/validate.js"></script>
 <script>
     new Vue({
         el:"#user_edit",
@@ -92,26 +91,19 @@
             return {
                 title:'用户信息修改',
                 form: {
-                    consignee:'',//用户名
+                    name:'',//用户名
                     sex:'1',//0表示女 1 表示男
-                    idNumber:'',//身份证号
-                    image:''//图片上传
+                    idNumber:''//身份证号
                 },
+                image:'',//图片上传
                 imageUrl:''
             }
         },
-        computed:{
-            rules () {
-                return {
-                    consignee: [{ required: true, message: "请输入用户名称", 'trigger': 'blur' }],
-                    idNumber: [{ required: true, message: "请输入身份证号", 'trigger': 'blur' }],
-                    imageUrl: [{required: true, message: "请上传图片", 'trigger': 'blur'}]
-                }
-                }
-        },
+        computed:{},
         created(){
             this.initData()
         },
+
         mounted(){
         },
         methods:{
@@ -121,18 +113,20 @@
             async initData(){
                 const params = parseUrl(window.location.search)
                 this.id = params.id
-                if(params.id){
+
+                 if(params.id){
                     this.title = '编辑用户信息'
-                    const res = await userFindOneApi(params.id)
+                    const res = await userFindOneApi(this.id)
                     if(res.code === 1){
+                        this.$notify({ type:'warning', message:"获取信息成功"});
                         this.form = res.data
                     }else{
-                        this.$notify({ type:'warning', message:res.msg});
+                        this.$notify({ type:'warning', message:"获取信息失败"});
                     }
                 }
             },
             async saveUser(st){
-                        let params = {...this.form}
+                let params = {...this.form}
                 if(!params.name){
                     this.$notify({ type:'warning', message:'请输入用户姓名'});
                     return
@@ -144,12 +138,12 @@
                     return
                 }
 
-                if(!this.imageUrl){
-                    this.$message.error('请上传用户头像')
-                    return
-                }
+                // if(!this.imageUrl){
+                //     this.$message.error('请上传用户头像')
+                //     return
+                // }
                         params.sex = this.form ? 1 : 0
-                        params.name = this.form.consignee
+                        params.name = this.form.name
                         params.idNumber = this.form.idNumber
                         params.image = this.imageUrl
                             updateUserApi(params).then(res => {
@@ -160,11 +154,11 @@
                                         this.goBack()
                                     } else {
                                         this. form = {
-                                                consignee:'',//用户名
+                                                name:'',//用户名
                                                 sex:'1',//0表示女 1 表示男
-                                                idNumber:'',//身份证号
-                                                image:''//图片上传
+                                                idNumber:''//身份证号
                                         }
+                                        image:'',//图片上传
                                         this.imageUrl = ''
                                     }
                                 } else {

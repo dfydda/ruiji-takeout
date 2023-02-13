@@ -146,12 +146,11 @@ public class UserController {
     /**
      * 根据id查询用户信息
      *
-     * @param id
-     * @return
      */
-    @GetMapping("/{id}")
-    public R<User> getId(@PathVariable Long id) {
+    @GetMapping()
+    public R<User> getId(HttpServletRequest request) {
         log.info("根据id查询用户信息...");
+        long id =(long)request.getSession().getAttribute("user");
         User user = userService.getById(id);
         if (user != null) {
             return R.success(user);
