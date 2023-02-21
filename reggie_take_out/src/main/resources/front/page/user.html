@@ -21,14 +21,23 @@
             <div class="divTitle">
                 <i class="el-icon-arrow-left" @click="goBack"></i>个人中心
             </div>
-            <div class="divUser">
-                <img src="./../images/headPage.png"/>
-                <div class="desc">
-                    <div class="divName">{{userName}} <img src="./../images/women.png"/></div>
-                    <div class="divPhone">{{userPhone}}</div>
-                </div>
-            </div>
+<!--            <div class="divUser">-->
+<!--                <img src="./../images/headPage.png"/>-->
+<!--                <div class="desc">-->
+<!--                    <div class="divName">{{userName}} <img src="./../images/women.png"/></div>-->
+<!--                    <div class="divPhone">{{userPhone}}</div>-->
+<!--                </div>-->
+<!--            </div>-->
+                        <div class="divUser">
+                            <img :src="getImage(userimage)" style=" border-radius: 50%;width: 60px; height: 60px;"/>
+                            <div class="desc">
+                                <div class="divName">{{username}}{{usersex == 0 ? "女士" : "先生"}}</div>
+                                <div class="divPhone">{{userPhone}}</div>
+                            </div>
+                        </div>
         </div>
+
+
         <div class="divContent">
             <div class="divLinks">
 
@@ -70,6 +79,9 @@
                     <span>共{{order[0].sumNum}} 件商品,实付</span>
                     <span class="price">￥{{order[0].amount}}</span>
                 </div>
+                <div class="btn" v-if="order[0].status < 4">
+                    <div class="btnAgain" @click="editOrderDetail">确认收货</div>
+                </div>
                 <div class="btn" v-if="order[0].status === 4">
                     <div class="btnAgain" @click="addOrderAgain">再来一单</div>
                 </div>
@@ -92,14 +104,21 @@
     <script src="./../js/request.js"></script>
     <script src="./../api/order.js"></script>
     <script src="./../api/login.js"></script>
+    <script src="../api/user.js"></script>
     <script>
         new Vue({
             el:"#user",
             data(){
                 return {
+                    circleUrl: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
                     form:{
                         phone:'',
-                        code:''
+                        code:'',
+                    },
+                    user:{
+                        name:'',//用户名
+                        sex:'1',//0表示女 1 表示男
+                        image:'',//图片上传
                     },
                     msgFlag:false,
                     order:[{
@@ -112,12 +131,21 @@
                         amount:undefined,//实收金额
                         sumNum:0,//菜品总数
                     }],
+
                 }
             },
             computed:{},
             created(){
                 this.userPhone =sessionStorage.getItem("userPhone")
                 this.initData()
+
+
+                if (localStorage.getItem('userInfo')!=null){
+                    this.id=JSON.parse(localStorage.getItem('userInfo')).id
+                    this.username=JSON.parse(localStorage.getItem('userInfo')).name
+                    this.usersex=JSON.parse(localStorage.getItem('userInfo')).sex
+                    this.userimage = JSON.parse(localStorage.getItem('userInfo')).image
+                }
             },
             mounted(){},
             methods:{
@@ -139,8 +167,11 @@
                         window.location.href = '/front/page/order.html'
                     }) 
                 },
-                initData(){
+                async initData(){
                     this.getLatestOrder()
+                },
+                getImage(userimage) {
+                    return `/common/download?name=${userimage}`
                 },
                 async getLatestOrder(){
                     const params = {
@@ -193,6 +224,18 @@
                         this.$notify({ type:'warning', message:res.msg});
                     }
                 },
+
+                async editOrderDetail(){
+                    const res = await orderAgainApi(4)
+                    if(res.code === 1){
+                        window.requestAnimationFrame(()=>{
+                            window.location.href = '/front/index.html'
+                        })
+                    }else{
+                        this.$notify({ type:'warning', message:res.msg});
+                    }
+                },
+
                 async toPageLogin(){
                     const res = await loginoutApi()
                     if(res.code === 1){

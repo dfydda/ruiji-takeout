@@ -1,6 +1,7 @@
 package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.User;
 import com.itheima.reggie.service.UserService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -147,15 +149,14 @@ public class UserController {
      * 根据id查询用户信息
      *
      */
-    @GetMapping()
-    public R<User> getId(HttpServletRequest request) {
+    @GetMapping("/{id}")
+    public R<User> getId(@PathVariable Long id) {
         log.info("根据id查询用户信息...");
-        long id =(long)request.getSession().getAttribute("user");
         User user = userService.getById(id);
         if (user != null) {
             return R.success(user);
         }
-        return R.error("操作失败");
+        return R.error("查询失败");
     }
 
     /**
@@ -167,11 +168,53 @@ public class UserController {
     @PutMapping
     public R<String> update(HttpServletRequest request,@RequestBody User user) {
         log.info(user.toString());
-        long id =(long)request.getSession().getAttribute("user");
-        user.setId(id);
+//        long id =(long)request.getSession().getAttribute("user");
+//        user.setId(id);
         userService.updateById(user);
         return R.success("用户信息修改成功");
     }
 
+    /**
+     * （批量）停用/启用
+     * @param status
+     * @param ids
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    public R<String> updateStatus(@PathVariable Integer status,@RequestParam List<Long> ids){
+        if(userService.updateStatus(status,ids)){
+            return R.success("修改状态成功");
+        }
+        return R.error("修改状态失败");
+    }
+
+    /**
+     * 批量删除或单个删除
+     * @param ids
+     * @return
+     */
+    public R<String> delete(@RequestParam("ids") List<Long> ids){
+        //逻辑删除
+        userService.deleteByIds(ids);
+        return R.success("删除成功");
+
+    }
+
+    /**
+     * 用户信息分页查询
+     * @param page
+     * @param pageSize
+     * @param name
+     * @return
+     */
+    @GetMapping("/page")
+    public R<Page> page(int page, int pageSize, String name){
+        Page<User> pageInfo = new Page<>(page,pageSize);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(name!=null,User::getName,name);
+        queryWrapper.orderByDesc(User::getPhone);
+        userService.page(pageInfo,queryWrapper);
+        return R.success(pageInfo);
+    }
 }
 

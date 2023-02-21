@@ -194,12 +194,8 @@
               :on-change="onChange"
               ref="upload"
             >
-              <img
-                v-if="imageUrl" :src="imageUrl" class="avatar"></img>
-              <i
-                v-else
-                class="el-icon-plus avatar-uploader-icon"
-              ></i>
+              <img v-if="imageUrl" :src="imageUrl" class="avatar"></img>
+              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
           </el-form-item>
         </div>

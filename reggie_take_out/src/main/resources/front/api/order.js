@@ -32,3 +32,12 @@ function orderAgainApi(data) {
       data
   })
 }
+
+// 取消，派送，完成接口
+const editOrderDetail = (params) => {
+    return $axios({
+        url: '/order',
+        method: 'put',
+        data: { ...params }
+    })
+}

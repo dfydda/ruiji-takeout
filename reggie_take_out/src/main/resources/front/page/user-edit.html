@@ -55,6 +55,7 @@
                     maxlength='20'
             /></el-input>
         </div>
+        <!--action必选参数上传的地址 before-upload移除前操作 on-success文件上传成功时的钩子-->
         <div class="divItem" prop="region">
             <span>头像上传：</span>
             <el-upload class="avatar-uploader"
@@ -93,9 +94,9 @@
                 form: {
                     name:'',//用户名
                     sex:'1',//0表示女 1 表示男
-                    idNumber:''//身份证号
+                    idNumber:'',//身份证号
+                    image:'',//图片上传
                 },
-                image:'',//图片上传
                 imageUrl:''
             }
         },
@@ -111,19 +112,19 @@
                 history.go(-1)
             },
             async initData(){
-                const params = parseUrl(window.location.search)
-                this.id = params.id
-
-                 if(params.id){
-                    this.title = '编辑用户信息'
-                    const res = await userFindOneApi(this.id)
-                    if(res.code === 1){
-                        this.$notify({ type:'warning', message:"获取信息成功"});
-                        this.form = res.data
-                    }else{
-                        this.$notify({ type:'warning', message:"获取信息失败"});
-                    }
+                if (localStorage.getItem('userInfo')!=null){
+                    this.id=JSON.parse(localStorage.getItem('userInfo')).id
                 }
+
+                userFindOneApi(this.id).then(res =>{
+                    console.log(res)
+                        if (String(res.code) === '1') {
+                        this.form = { ...res.data }
+                        this.imageUrl = `/common/download?name=${res.data.image}`
+                        }else {
+                this.$message.error(res.msg || '操作失败')
+              }
+                })
             },
             async saveUser(st){
                 let params = {...this.form}
@@ -145,7 +146,7 @@
                         params.sex = this.form ? 1 : 0
                         params.name = this.form.name
                         params.idNumber = this.form.idNumber
-                        params.image = this.imageUrl
+                        params.id = this.id
                             updateUserApi(params).then(res => {
                                 if (res.code === 1) {
                                     this.$message.success('用户信息添加成功！')
@@ -156,9 +157,10 @@
                                         this. form = {
                                                 name:'',//用户名
                                                 sex:'1',//0表示女 1 表示男
-                                                idNumber:''//身份证号
+                                                idNumber:'',//身份证号
+                                                image:''//图片上传
                                         }
-                                        image:'',//图片上传
+
                                         this.imageUrl = ''
                                     }
                                 } else {
@@ -170,7 +172,14 @@
             },
             //图片上传发送后端请求
             handleAvatarSuccess (response, file, fileList) {
-                this.imageUrl = `/common/download?name=${response.data}`},
+                // 拼接down接口预览
+                if(response.code === 0 && response.msg === '未登录'){
+                    window.top.location.href = '/front/page/login.html'
+                }else{
+                    this.imageUrl = `/common/download?name=${response.data}`
+                    this.form.image = response.data
+                }
+            },
             beforeUpload (file) {
                 if(file){
                     const suffix = file.name.split('.')[1]
