@@ -79,8 +79,11 @@
                     <span>共{{order[0].sumNum}} 件商品,实付</span>
                     <span class="price">￥{{order[0].amount}}</span>
                 </div>
-                <div class="btn" v-if="order[0].status < 4">
-                    <div class="btnAgain" @click="editOrderDetail">确认收货</div>
+                <div class="btn" v-if="order[0].status <=3">
+                    <div class="btncancel" type="text" @click="cancelOrderDetail(5,order[0].id)">取消订单</div>
+                    <div class="btnOK"
+                         type="text"
+                         @click="editOrderDetail(4,order[0].id)">确认收货</div>
                 </div>
                 <div class="btn" v-if="order[0].status === 4">
                     <div class="btnAgain" @click="addOrderAgain">再来一单</div>
@@ -225,17 +228,38 @@
                     }
                 },
 
-                async editOrderDetail(){
-                    const res = await orderAgainApi(4)
-                    if(res.code === 1){
-                        window.requestAnimationFrame(()=>{
-                            window.location.href = '/front/index.html'
-                        })
-                    }else{
-                        this.$notify({ type:'warning', message:res.msg});
+                async editOrderDetail(status, id){
+                    const params = {
+                        status,
+                        id
                     }
+                  editOrderDetail(params).then(res =>{
+                    if(res.code === 1){
+                         this.$message.success('订单已完成')
+                         window.requestAnimationFrame(()=>{
+                           window.location.href = '/front/page/user.html'
+                         })
+                    }else{
+                        his.$notify({ type:'warning', message:res.msg});
+                    }
+                  })
                 },
-
+                async cancelOrderDetail(status, id){
+                    const params = {
+                        status,
+                        id
+                    }
+                    editOrderDetail(params).then(res =>{
+                        if(res.code === 1){
+                            this.$message.success('订单取消成功')
+                            window.requestAnimationFrame(()=>{
+                                window.location.href = '/front/page/user.html'
+                            })
+                        }else{
+                            his.$notify({ type:'warning', message:res.msg});
+                        }
+                    })
+                },
                 async toPageLogin(){
                     const res = await loginoutApi()
                     if(res.code === 1){

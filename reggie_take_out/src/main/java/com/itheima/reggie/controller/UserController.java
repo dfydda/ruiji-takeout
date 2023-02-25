@@ -5,19 +5,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.User;
 import com.itheima.reggie.service.UserService;
+import com.itheima.reggie.service.SendTestMail;
 import com.itheima.reggie.util.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -31,58 +28,79 @@ public class UserController {
     //默认通过名称注入，如名称无法找到，则通过类型注入 名称：userService,类型UserService
     @Autowired
     private UserService userService;
+    @Autowired
+    private SendTestMail sendTestMail;
     //默认通过类型注入，如存在多个类型则通过名称注入
     @Autowired
     private RedisTemplate redisTemplate;
-    @Resource
-    private JavaMailSender javaMailSender;//我们需要用这个进行邮件发送
-    //注意这里我们将发送者从配置文件注入进来
-    @Value("${spring.mail.username}")
-    private String from;
+//    @Resource
+//    private JavaMailSender javaMailSender;//我们需要用这个进行邮件发送
+//    //注意这里我们将发送者从配置文件注入进来
+//    @Value("${spring.mail.username}")
+//    private String from;
 
-    /**
-     * 发送手机短信验证码
-     *
-     * @param user
-     * @return
-     */
+//    /**
+//     * 发送手机短信验证码
+//     *
+//     * @param user
+//     * @return
+//     */
+//    @PostMapping("/sendMsg")
+//    private R<String> sendMsg(@RequestBody User user, HttpSession session) {
+//        //用163邮箱去发送验证码
+//        //获取到前端提交过来的邮箱帐号
+//        String phone = user.getPhone();
+//        //这里工具类判是否为空
+//        if (StringUtils.isNotEmpty(phone)) {
+//            //生成随机的4位验证码
+//            String code = ValidateCodeUtils.generateValidateCode(4).toString();
+//            log.info("code={}", code);
+//
+//            //构建一个邮件的对象
+//            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+//            // 设置邮件发件者
+//            simpleMailMessage.setFrom(from);
+//            //设置邮件接受者
+//            simpleMailMessage.setTo(phone);
+//            //设置有纪念的主题
+//            simpleMailMessage.setSubject("登录验证码");
+//            //设置邮件的征文
+//            String text = "验证码测试，验证码为" + code + "是否收到";
+//            simpleMailMessage.setText(text);
+//            //将生成的验证码保存到Session
+//            //将我们生成的手机号和验证码放到session里面，我们后面用户填入验证码之后，我们验证的时候就从这里去取然后进行比对
+//            //这里我们需要一个异常捕获
+//            //session.setAttribute(phone, code);
+//            //将生成的验证码缓存到Redis中，并且设置有效期为1分钟
+//            redisTemplate.opsForValue().set(phone, code, 1, TimeUnit.MINUTES);
+//            //return R_.success("手机验证码短信发送成功");
+//            try {
+//                //javaMailSender.send(simpleMailMessage);//发送验证码
+//                return R.success("手机验证码短信发送成功");
+//            } catch (MailException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        return R.error("短信发送失败");
+//    }
+
     @PostMapping("/sendMsg")
-    private R<String> sendMsg(@RequestBody User user, HttpSession session) {
-        //用163邮箱去发送验证码
-        //获取到前端提交过来的邮箱帐号
-        String phone = user.getPhone();
-        //这里工具类判是否为空
-        if (StringUtils.isNotEmpty(phone)) {
-            //生成随机的4位验证码
+    private R<String> sendMsg(@RequestBody User user) throws MessagingException {
+          String phone = user.getPhone();
+          if (StringUtils.isNotEmpty(phone)){
+              //生成随机的4位验证码
             String code = ValidateCodeUtils.generateValidateCode(4).toString();
             log.info("code={}", code);
-
-            //构建一个邮件的对象
-            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-            // 设置邮件发件者
-            simpleMailMessage.setFrom(from);
-            //设置邮件接受者
-            simpleMailMessage.setTo(phone);
-            //设置有纪念的主题
-            simpleMailMessage.setSubject("登录验证码");
-            //设置邮件的征文
-            String text = "验证码测试，验证码为" + code + "是否收到";
-            simpleMailMessage.setText(text);
-            //将生成的验证码保存到Session
-            //将我们生成的手机号和验证码放到session里面，我们后面用户填入验证码之后，我们验证的时候就从这里去取然后进行比对
-            //这里我们需要一个异常捕获
-            //session.setAttribute(phone, code);
-            //将生成的验证码缓存到Redis中，并且设置有效期为1分钟
+            String test = "登录验证码为："+ code + "，有效时间为60s,欢迎登录app";
             redisTemplate.opsForValue().set(phone, code, 1, TimeUnit.MINUTES);
-            //return R_.success("手机验证码短信发送成功");
-            try {
-                //javaMailSender.send(simpleMailMessage);//发送验证码
+              try {
+                 // sendTestMail.sendTestMail(phone,test);
                 return R.success("手机验证码短信发送成功");
             } catch (MailException e) {
                 e.printStackTrace();
             }
-        }
-        return R.error("短信发送失败");
+          }
+        return R.success("短信发送失败");
     }
 
     /**
