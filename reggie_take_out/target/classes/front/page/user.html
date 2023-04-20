@@ -29,7 +29,7 @@
 <!--                </div>-->
 <!--            </div>-->
                         <div class="divUser">
-                            <img :src="getImage(userimage)" style=" border-radius: 50%;width: 60px; height: 60px;"/>
+                            <img :src="getImage(userimage)" onerror="this.src='/front/images/head.png'" style=" border-radius: 50%;width: 60px; height: 60px;"/>
                             <div class="desc">
                                 <div class="divName">{{username}}{{usersex == 0 ? "女士" : "先生"}}</div>
                                 <div class="divPhone">{{userPhone}}</div>
@@ -113,7 +113,6 @@
             el:"#user",
             data(){
                 return {
-                    circleUrl: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
                     form:{
                         phone:'',
                         code:'',

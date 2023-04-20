@@ -207,6 +207,41 @@
   justify-content: flex-end;
 }
 
+#user .divOrders .btn .btncancel {
+  width: 124rem;
+  height: 36rem;
+  opacity: 1;
+  border: 1px solid #e5e4e4;
+  border-radius: 19rem;
+  opacity: 1;
+  font-size: 14rem;
+  font-family: PingFangSC, PingFangSC-Regular;
+  font-weight: 500;
+  text-align: center;
+  color: #333333;
+  line-height: 36rem;
+  letter-spacing: 0;
+  position: relative;
+}
+
+#user .divOrders .btn .btnOK {
+  width: 124rem;
+  height: 36rem;
+  opacity: 1;
+  border: 1px solid #e5e4e4;
+  border-radius: 19rem;
+  opacity: 1;
+  font-size: 14rem;
+  font-family: PingFangSC, PingFangSC-Regular;
+  font-weight: 500;
+  text-align: center;
+  color: #333333;
+  line-height: 36rem;
+  letter-spacing: 0;
+  position: relative;
+  background-color: #ffc200;
+}
+
 #user .divOrders .btn .btnAgain {
   width: 124rem;
   height: 36rem;
@@ -222,6 +257,7 @@
   line-height: 36rem;
   letter-spacing: 0;
   position: relative;
+  background-color: #ffc200;
 }
 
 #user .quitLogin {
