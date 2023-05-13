@@ -168,7 +168,7 @@ public class UserController {
      *
      */
     @GetMapping("/{id}")
-    public R<User> getId(@PathVariable Long id) {
+    public R<User> getById(@PathVariable Long id) {
         log.info("根据id查询用户信息...");
         User user = userService.getById(id);
         if (user != null) {

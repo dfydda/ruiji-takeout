@@ -35,10 +35,10 @@
           ></i>
         </el-input>
         <el-button
+          v-if="user === 'admin'"
           type="primary"
           @click="addMemberHandle('add')"
-        >
-          + 添加员工
+        > + 添加员工
         </el-button>
       </div>
       <el-table

@@ -152,12 +152,19 @@
                     url: 'page/order/list.html',
                     icon: 'icon-order'
                   },
-              {
-                id: '7',
-                name: '用户管理',
-                url: 'page/user/list.html',
-                icon: 'icon-user'
-              }
+                  {
+                    id: '7',
+                    name: '用户管理',
+                    url: 'page/user/list.html',
+                    icon: 'icon-user'
+                  },
+                  {
+                    id: '8',
+                    name: '论坛管理',
+                    url: 'page/forum/list.html',
+                    icon: 'icon-forum'
+                  }
+
               //   ],
               // },
             ],
@@ -199,6 +206,7 @@
             // this.headTitle = menu.name
             this.menuHandle(menu,false)
           },
+
           menuHandle(item, goBackFlag) {
             this.loading = true
             this.menuActived = item.id

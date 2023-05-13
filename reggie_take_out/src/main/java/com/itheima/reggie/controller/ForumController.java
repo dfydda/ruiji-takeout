@@ -1,0 +1,116 @@
+package com.itheima.reggie.controller;
+
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.reggie.common.R;
+import com.itheima.reggie.dto.ForumDto;
+import com.itheima.reggie.entity.Dish;
+import com.itheima.reggie.entity.Employee;
+import com.itheima.reggie.entity.Forum;
+import com.itheima.reggie.service.EmployeeService;
+import com.itheima.reggie.service.ForumService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/forum")
+@Slf4j
+public class ForumController {
+    @Autowired
+    private ForumService forumService;
+    @Autowired
+    private EmployeeService employeeService;
+
+    /**
+     * 添加论坛
+     * @param forum
+     * @return
+     */
+    @PostMapping
+    private R<String> add(@RequestBody Forum forum){
+        log.info("Forum:{}",forum);
+
+        forumService.save(forum);
+        return R.success("添加成功");
+    }
+
+    /**
+     * 根据id删除论坛
+     * @param id
+     * @return
+     */
+    @DeleteMapping
+    private R<String> delete(Long id){
+        log.info("删除论坛，id为{}",id);
+        forumService.removeById(id);
+        return R.success("删除成功");
+    }
+
+    /**
+     * 根据id修改论坛
+     * @param forum
+     * @return
+     */
+    @PutMapping
+    private R<String> update(@RequestBody Forum forum){
+        log.info(forum.toString());
+        forumService.updateById(forum);
+        return R.success("修改成功");
+    }
+
+    /**
+     * 分页查询
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @GetMapping("/page")
+    public R<Page<ForumDto>> page(int page , int pageSize,String name){
+        //分页查询
+        Page<Forum> pageInfo = new Page<>(page,pageSize);
+        Page<ForumDto> pageInfo1 = new Page<>();
+        //条件查询
+        LambdaQueryWrapper<Forum> queryWrapper = new LambdaQueryWrapper<>();
+        //添加过滤条件
+        queryWrapper.like(name != null, Forum::getName,name);
+        //添加排序条件，根据updatetime进行排序
+        queryWrapper.orderByDesc(Forum::getUpdateTime);
+
+        BeanUtils.copyProperties(pageInfo,pageInfo1,"records");//ignoreProperties忽视，record
+        //分页查询
+        forumService.page(pageInfo,queryWrapper);
+        List<Forum> forums = pageInfo.getRecords();//获取Records实体记录
+        List<ForumDto> Dto=forums.stream().map((item)->{//stream流处理
+            ForumDto forumDto = new ForumDto();//初始化
+            BeanUtils.copyProperties(item,forumDto);//原本的实体和Dto的实体相互复制
+            Long createUserID = item.getCreateUser();//获取CreateUser的id
+            String username = employeeService.getById(createUserID).getName();
+            forumDto.setUsername(username);
+            return forumDto;
+        }).collect(Collectors.toList());
+        pageInfo1.setRecords(Dto);//将Dto实体存入pageInfo1
+        //内容拷贝
+        return R.success(pageInfo1);
+    }
+
+    /**
+     * 根据id查询论坛内容
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<Forum> getById(@PathVariable Long id){
+        log.info("根据id查询文章信息...");
+        Forum forum =forumService.getById(id);
+        if(forum != null){
+            return R.success(forum);
+        }
+            return R.error("文章查询失败");
+    }
+}
