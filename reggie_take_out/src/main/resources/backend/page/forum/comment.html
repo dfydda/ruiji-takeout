@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css" />
+    <link rel="stylesheet" href="../../styles/common.css" />
+    <link rel="stylesheet" href="../../styles/page.css" />
+    <style>
+        .selectInput {
+            position: relative;
+            width: 100%;
+            min-width: 100px;
+        }
+        .selectInput .flavorSelect {
+            position: absolute;
+            width: 100%;
+            padding: 0 10px;
+            border-radius: 3px;
+            border: solid 1px #FF903D;
+            line-height: 30px;
+            text-align: center;
+            background: #fff;
+            top: 50px;
+            z-index: 99;
+        }
+        .selectInput .flavorSelect .items {
+            cursor: pointer;
+            display: inline-block;
+            width: 100%;
+            line-height: 35px;
+            border-bottom: solid 1px #f4f4f4;
+            color: #666;
+        }
+        .selectInput .flavorSelect .none {
+            font-size: 14px;
+        }
+        #food-add-app .uploadImg .el-form-item__label::before{
+            content: '*';
+            color: #F56C6C;
+            margin-right: 4px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="dashboard-container" id="forum-visit-app">
+    <div class="container">
+        <div class="tableBar">
+
+            <div>
+                <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                    <el-form-item label="评论内容">
+                        <el-input v-model="formInline.message" placeholder="请输入内容" style="width: 500px"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="">发送</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <div class="tableLab" style="float: right">
+                <el-button
+                        type="primary"
+                        @click="dialogVisible = true"
+                > + 新建评论
+                </el-button>
+                <el-dialog
+                        title="提示"
+                        :visible.sync="dialogVisible"
+                        width="100%"
+                        :before-close="handleClose"
+                        :modal-append-to-body="false">
+                    <!--:modal-append-to-body="false"去除弹窗遮罩层-->
+                    <el-form
+                            ref="ruleForm"
+                            :model="ruleForm"
+                            :rules="rules"
+                            :inline="true"
+                            label-width="180px"
+                            class="demo-ruleForm"
+                    >
+                        <el-form-item
+                                label="聊天内容:"
+                                prop="region"
+                        >
+                            <el-input
+                                    v-model="ruleForm.text"
+                                    type="textarea"
+                                    :rows="3"
+                                    placeholder="内容描述，最长100字"
+                                    maxlength="100"
+                            />
+                        </el-form-item>
+                    </el-form>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button @click="dialogVisible = false">取 消</el-button>
+                        <el-button type="primary" @click="add('ruleForm')">发 布</el-button>
+                    </span>
+                </el-dialog>
+
+            </div>
+
+        </div>
+        <el-table
+                :data="tableData"
+                stripe
+                class="tableBox"
+                @selection-change="handleSelectionChange"
+        >
+            <el-table-column prop="image" label="图片" align="center">
+                <template slot-scope="{ row }">
+                    <el-image style="width: auto; height: 40px; border:none;cursor: pointer;"
+                              :src="getImage(row.image)"
+                              :preview-src-list="[ `/common/download?name=${row.image}` ]" >
+                        <div slot="error" class="image-slot">
+                            <img src="./../../images/noImg.png"  style="width: auto; height: 40px; border:none;" >
+                        </div>
+                    </el-image>
+                </template>
+            </el-table-column>
+
+            <el-table-column
+                    prop="username"
+                    label="用户名称"
+            ></el-table-column>
+
+            <el-table-column label="评论">
+                <template slot-scope="scope">
+                    <span style="margin-right: 10px;">{{ scope.row.message }}</span>
+                </template>
+            </el-table-column>
+
+            <el-table-column
+                    label="操作"
+                    width="160"
+                    align="center"
+            >
+                <template slot-scope="scope">
+                    <el-button
+                            type="text"
+                            size="small"
+                            class="blueBug"
+                            @click="edit(scope.row.id)"
+                    >修改
+                    </el-button>
+
+                    <el-button
+                            type="text"
+                            size="small"
+                            class="delBut non"
+                            @click="delete(scope.row.id)"
+                    >删除
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination
+                class="pageList"
+                :page-sizes="[10, 20, 30, 40]"
+                :page-size="pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="counts"
+                @size-change="handleSizeChange"
+                :current-page.sync="page"
+                @current-change="handleCurrentChange"
+        ></el-pagination>
+    </div>
+</div>
+<!-- 开发环境版本，包含了有帮助的命令行警告 -->
+<script src="../../plugins/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../plugins/element-ui/index.js"></script>
+<!-- 引入axios -->
+<script src="../../plugins/axios/axios.min.js"></script>
+<script src="../../js/request.js"></script>
+<script src="../../js/validate.js"></script>
+<script src="../../js/index.js"></script>
+<script src="../../api/comment.js"></script>
+
+<script>
+    new Vue({
+        el : '#forum-visit-app',
+        data(){
+            return{
+                ruleForm : {
+                    'message': ''
+                },
+                tableData: [],
+                dialogVisible: false,
+                formInline: {
+                    message : ''
+                },
+                counts: 0,
+                page: 1,
+                pageSize: 10,
+                actionType: '',
+                value: '',
+
+            }
+        },
+        computed: {
+           rules(){
+               return {
+                   'message' : [{'required': true, 'message' : '请填写文章内容','trigger' : 'blur'}],
+               }
+           }
+        },
+        created(){
+            this.id = requestUrlParam('id')
+            if(this.id){
+                this.init()
+            }
+        },
+        mounted(){},
+        methods: {
+            async init(){
+                const params = {
+                    page: this.page,
+                    pageSize: this.pageSize
+                }
+                await getMessagePage(params).then(res => {
+                    if (String(res.code) === '1') {
+                        this.tableData = res.data.records || []
+                        this.counts = res.data.total
+                    }
+                }).catch(err => {
+                    this.$message.error('请求出错了：' + err)
+                })
+            },
+
+            add(formName){
+                this.$refs[formName].validate((valid) => {
+                    if(valid){
+                        let params = {...this.ruleForm}
+                        params.message= this.ruleForm.message
+                        addMessage(params).then(res =>{
+                            if(res.code === 1){
+                                this.$message.success('文章添加成功！')
+                                dialogVisible: false
+                            }else{
+                                this.$message.error(res.msg || '操作失败')
+                                dialogVisible: false
+                            }
+                        }).catch(err =>{
+                            this.$message('请求出错了：' + err)
+                            dialogVisible: false
+                        })
+                    }else{
+                        dialogVisible: false
+                        return false
+                    }
+                })
+            },
+
+            edit(st){
+                dialogVisible: true
+                queryMessageById(st).then(res =>{
+                    if(String(res.code) === '1'){
+                        this.ruleForm = { ...res.data }
+                        this.ruleForm.message = res.data.message
+                    }else {
+                        this.$message.error(res.msg || '操作失败')
+                    }
+                })
+            },
+
+            delete (st) {
+                this.$confirm('确认删除该评论, 是否继续?', '确定删除', {
+                    'confirmButtonText': '确定',
+                    'cancelButtonText': '取消',
+                }).then(() => {
+                    deleteMessage (st).then(res => {
+                        if (res.code === 1) {
+                            this.$message.success('删除成功！')
+                            this.handleQuery()
+                        } else {
+                            this.$message.error(res.msg || '操作失败')
+                        }
+                    }).catch(err => {
+                        this.$message.error('请求出错了：' + err)
+                    })
+                })
+            },
+            handleQuery() {
+                this.page = 1;
+                this.init();
+            },
+
+            handleClose(done) {
+                this.$confirm('确认关闭？')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => {});
+            },
+            goBack(id){
+                window.parent.menuHandle({
+                    id: '8',
+                    url: '/backend/page/forum/read.html?id='+id,
+                    name: '文章详情'
+                },true)
+            },
+
+            // 全部操作
+            handleSelectionChange (val){
+                let checkArr = []
+                val.forEach((n) => {
+                    checkArr.push(n.id)
+                })
+                this.checkList = checkArr
+            },
+
+            handleSizeChange (val) {
+                this.pageSize = val
+                this.init()
+            },
+
+            handleCurrentChange (val) {
+                this.page = val
+                this.init()
+            }
+        }
+    })
+</script>
+</body>
+</html>

@@ -52,7 +52,6 @@
       <el-form
         ref="ruleForm"
         :model="ruleForm"
-        :rules="rules"
         :inline="true"
         label-width="180px"
         class="demo-ruleForm"
@@ -63,9 +62,10 @@
             prop="name"
           >
             <el-input
-              v-model="ruleForm.name"
-              placeholder="请填写文章名称"
-              maxlength="20"
+                    v-model="ruleForm.name"
+                    placeholder="文章名称显示区域"
+                    maxlength="20"
+                    :disabled="true"
             />
           </el-form-item>
         </div>
@@ -76,14 +76,6 @@
             prop="region"
             class="uploadImg"
           >
-            <el-upload
-              class="avatar-uploader"
-              action="/common/upload"
-              :show-file-list="false"
-              :on-success="handleAvatarSuccess"
-              :on-change="onChange"
-              ref="upload"
-            >
               <img v-if="imageUrl" :src="imageUrl" class="avatar"></img>
               <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
@@ -95,25 +87,25 @@
             prop="region"
           >
             <el-input
-              v-model="ruleForm.text"
-              type="textarea"
-              :rows="3"
-              placeholder="内容描述，最长500字"
-              maxlength="500"
-              style="width: 900px;height: 200px"
+                    v-model="ruleForm.text"
+                    type="textarea"
+                    :rows="3"
+                    placeholder="文章展示区域"
+                    maxlength="500"
+                    :disabled="true"
             />
           </el-form-item>
         </div>
         <div class="subBox address">
           <el-form-item>
             <el-button @click="goBack()">
-              取消
+             返回
             </el-button>
             <el-button
               type="primary"
-              @click="submitForm('ruleForm')"
+              @click="read(this.id)"
             >
-              保存
+              评论
             </el-button>
 
 
@@ -161,20 +153,13 @@
               'image': '',
               'text': ''
             },
+            tableData: [],
             mak: false
           }
         },
-        computed: {
-          rules () {
-            return {
-              'name': [{'required': true, 'message': '请填写文章名称', 'trigger': 'blur'}],
-              'text': [{'required': true, 'message': '请填写文章内容', 'trigger': 'blur'}],
-            }
-          }
-        },
+        computed: {},
         created() {
           this.id = requestUrlParam('id')
-          this.actionType = this.id ? 'edit' : 'add'
           if (this.id) {
             this.init()
           }
@@ -196,55 +181,13 @@
             })
           },
 
-          submitForm(formName, st) {
-            this.$refs[formName].validate((valid) => {
-              if (valid) {
-                let params = {...this.ruleForm}
-                params.username= this.ruleForm.username
-                params.text=this.ruleForm.text
-                params.image=this.ruleForm.image
-                if(!this.imageUrl){
-                  this.$message.error('请上传文章图片')
-                  return 
-                }
-                if (this.actionType == 'add') {
-                  delete params.id
-                  addText(params).then(res => {
-                    if (res.code === 1) {
-                      this.$message.success('文章添加成功！')
-                      if (!st) {
-                        this.goBack()
-                      } else {
-                        this.imageUrl = ''
-                        this.ruleForm = {
-                          'username': '',
-                          'image': '',
-                          'text': ''
-                        }
-                      }
-                    } else {
-                      this.$message.error(res.msg || '操作失败')
-                    }
-                  }).catch(err => {
-                    this.$message.error('请求出错了：' + err)
-                  })
-                } else {
-                  editText(params).then(res => {
-                    if (res.code === 1) {
-                      this.$message.success('文章修改成功！')
-                      this.goBack()
-                    } else {
-                      this.$message.error(res.msg || '操作失败')
-                    }
-                  }).catch(err => {
-                    this.$message.error('请求出错了：' + err)
-                  })
-                }
-              } else {
-                return false
-              }
-            })
-          },
+         read(st){
+           window.parent.menuHandle({
+             id: '8',
+             url: '/backend/page/forum/comment.html?id='+st,
+             name: '评论'
+           },true)
+         },
 
           handleAvatarSuccess (response, file, fileList) {
             // 拼接down接口预览
@@ -253,22 +196,6 @@
             }else{
               this.imageUrl = `/common/download?name=${response.data}`
               this.ruleForm.image = response.data
-            }
-          },
-          onChange (file) {
-            if(file){
-              const suffix = file.name.split('.')[1]
-              const size = file.size / 1024 / 1024 < 2
-              if(['png','jpeg','jpg'].indexOf(suffix) < 0){
-                this.$message.error('上传图片只支持 png、jpeg、jpg 格式！')
-                this.$refs.upload.clearFiles()
-                return false
-              }
-              if(!size){
-                this.$message.error('上传文件大小不能超过 2MB!')
-                return false
-              }
-              return file
             }
           },
 

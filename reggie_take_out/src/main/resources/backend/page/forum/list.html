@@ -81,6 +81,14 @@
         >
           <template slot-scope="scope">
             <el-button
+                    type="text"
+                    size="small"
+                    class="blueBug"
+                    @click="readText(scope.row.id)"
+            >浏览
+            </el-button>
+
+            <el-button
               type="text"
               size="small"
               class="blueBug"
@@ -192,7 +200,15 @@
               })
             })
           },
-
+          //浏览文章
+          readText (st)
+          {
+            window.parent.menuHandle({
+              id: '8',
+              url: '/backend/page/forum/read.html?id='+st,
+              name: '文章详情'
+            },true)
+          },
 
           // 全部操作
           handleSelectionChange (val){
@@ -202,10 +218,12 @@
             })
             this.checkList = checkArr
           },
+
           handleSizeChange (val) {
             this.pageSize = val
             this.init()
           },
+
           handleCurrentChange (val) {
             this.page = val
             this.init()
