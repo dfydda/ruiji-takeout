@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/common")
 @Slf4j
-public class Commontroller {
+public class CommonController {
     @Value("${reggie.path}")
     private String basePath;
 

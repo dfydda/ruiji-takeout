@@ -70,7 +70,7 @@
                 <el-dialog
                         title="提示"
                         :visible.sync="dialogVisible"
-                        width="100%"
+                        width="50%"
                         :before-close="handleClose"
                         :modal-append-to-body="false">
                     <!--:modal-append-to-body="false"去除弹窗遮罩层-->
@@ -87,11 +87,12 @@
                                 prop="region"
                         >
                             <el-input
-                                    v-model="ruleForm.text"
+                                    v-model="ruleForm.message"
                                     type="textarea"
                                     :rows="3"
                                     placeholder="内容描述，最长100字"
                                     maxlength="100"
+                                    width="250px"
                             />
                         </el-form-item>
                     </el-form>
@@ -110,18 +111,6 @@
                 class="tableBox"
                 @selection-change="handleSelectionChange"
         >
-            <el-table-column prop="image" label="图片" align="center">
-                <template slot-scope="{ row }">
-                    <el-image style="width: auto; height: 40px; border:none;cursor: pointer;"
-                              :src="getImage(row.image)"
-                              :preview-src-list="[ `/common/download?name=${row.image}` ]" >
-                        <div slot="error" class="image-slot">
-                            <img src="./../../images/noImg.png"  style="width: auto; height: 40px; border:none;" >
-                        </div>
-                    </el-image>
-                </template>
-            </el-table-column>
-
             <el-table-column
                     prop="username"
                     label="用户名称"
@@ -143,7 +132,7 @@
                             type="text"
                             size="small"
                             class="blueBug"
-                            @click="edit(scope.row.id)"
+                            @click="edit(scope.row)"
                     >修改
                     </el-button>
 
@@ -185,6 +174,7 @@
         el : '#forum-visit-app',
         data(){
             return{
+                id : '',
                 ruleForm : {
                     'message': ''
                 },
@@ -196,9 +186,13 @@
                 counts: 0,
                 page: 1,
                 pageSize: 10,
-                actionType: '',
                 value: '',
-
+                actionType: '',
+                temporaryData: {
+                    id: '',
+                    forumId: '',
+                    message: '',
+                },
             }
         },
         computed: {
@@ -219,7 +213,8 @@
             async init(){
                 const params = {
                     page: this.page,
-                    pageSize: this.pageSize
+                    pageSize: this.pageSize,
+                    forumId: this.id
                 }
                 await getMessagePage(params).then(res => {
                     if (String(res.code) === '1') {
@@ -233,41 +228,57 @@
 
             add(formName){
                 this.$refs[formName].validate((valid) => {
-                    if(valid){
-                        let params = {...this.ruleForm}
-                        params.message= this.ruleForm.message
-                        addMessage(params).then(res =>{
-                            if(res.code === 1){
-                                this.$message.success('文章添加成功！')
-                                dialogVisible: false
-                            }else{
-                                this.$message.error(res.msg || '操作失败')
-                                dialogVisible: false
-                            }
-                        }).catch(err =>{
-                            this.$message('请求出错了：' + err)
-                            dialogVisible: false
-                        })
+                    if (valid){
+                        this.temporaryData.message = this.ruleForm.message
                     }else{
-                        dialogVisible: false
                         return false
                     }
                 })
+                const temporaryData =this.temporaryData
+                if(this.actionType === 'edit'){
+                    editMessage(temporaryData).then(res =>{
+                        if(res.code === 1){
+                            this.$message.success('修改成功！')
+                            this.temporaryData.dialogVisible = false
+                            this.handleQuery()
+                        }else{
+                            this.$message.error(res.msg || '操作失败')
+                        }
+                    }).catch(err =>{
+                        this.$message('请求出错了：' + err)
+                    })
+                }else {
+                    delete temporaryData.id
+
+                    addMessage(temporaryData).then(res =>{
+                        if(res.code === 1){
+                            this.$message.success('评论成功！')
+                            this.temporaryData.dialogVisible = false
+                            this.handleQuery()
+                        }else{
+                            this.$message.error(res.msg || '操作失败')
+                        }
+                    }).catch(err =>{
+                        this.$message('请求出错了：' + err)
+                    })
+                }
+                
             },
 
-            edit(st){
-                dialogVisible: true
-                queryMessageById(st).then(res =>{
+            edit(dat){
+                this.dialogVisible = true
+                this.actionType = 'edit'
+                queryMessageById(dat.id).then(res =>{
                     if(String(res.code) === '1'){
                         this.ruleForm = { ...res.data }
                         this.ruleForm.message = res.data.message
-                    }else {
-                        this.$message.error(res.msg || '操作失败')
+                        this.temporaryData.id = dat.id
+                        this.temporaryData.forumId = this.id
                     }
                 })
             },
 
-            delete (st) {
+            delete(st) {
                 this.$confirm('确认删除该评论, 是否继续?', '确定删除', {
                     'confirmButtonText': '确定',
                     'cancelButtonText': '取消',

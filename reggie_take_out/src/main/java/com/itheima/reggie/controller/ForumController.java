@@ -81,21 +81,26 @@ public class ForumController {
         queryWrapper.like(name != null, Forum::getName,name);
         //添加排序条件，根据updatetime进行排序
         queryWrapper.orderByDesc(Forum::getUpdateTime);
-
-        BeanUtils.copyProperties(pageInfo,pageInfo1,"records");//ignoreProperties忽视，record
-        //分页查询
+        //调用数据层的分页查询方法，此时forumPage中已经有值了
         forumService.page(pageInfo,queryWrapper);
+
+        // 把pageInfo中的属性值复制到pageInfo1中，但要忽略pageInfo中的records
+        // 这是因为records中的数据是真正展示到浏览器上的，我们要处理一下records中的数据
+        BeanUtils.copyProperties(pageInfo,pageInfo1,"records");//ignoreProperties忽视，record实体记录
+        //使用stream处理pageInfo集合，目的是处理成pageInfoDtoRecords的集合
         List<Forum> forums = pageInfo.getRecords();//获取Records实体记录
-        List<ForumDto> Dto=forums.stream().map((item)->{//stream流处理
-            ForumDto forumDto = new ForumDto();//初始化
-            BeanUtils.copyProperties(item,forumDto);//原本的实体和Dto的实体相互复制
+        //通过stream流处理forumRecords，目的是要根据员工ID查询employee表，最终获得员工名称
+        List<ForumDto> Dto=forums.stream().map((item)->{//遍历forumRecords集合中的每个forum，进行如下操作
+            //创建 forum对象
+            ForumDto forumDto = new ForumDto();
+            //先把forum对象的所有属性拷贝到forumDto对象，然后再添加没有的员工名称
+            BeanUtils.copyProperties(item,forumDto);
             Long createUserID = item.getCreateUser();//获取CreateUser的id
             String username = employeeService.getById(createUserID).getName();
-            forumDto.setUsername(username);
-            return forumDto;
-        }).collect(Collectors.toList());
-        pageInfo1.setRecords(Dto);//将Dto实体存入pageInfo1
-        //内容拷贝
+            forumDto.setUsername(username);//设置员工名称
+            return forumDto;//返回全部赋值完成的forumDto
+        }).collect(Collectors.toList());// stream流的终止操作：返回一个List集合
+        pageInfo1.setRecords(Dto);//把处理好的forumDtoRecords赋回forumDtoPage中
         return R.success(pageInfo1);
     }
 
