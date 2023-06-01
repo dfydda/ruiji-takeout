@@ -52,12 +52,12 @@
         <div class="tableBar">
 
             <div>
-                <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                <el-form :inline="true" :model="ruleForm" ref="formInline" class="demo-form-inline">
                     <el-form-item label="评论内容">
-                        <el-input v-model="formInline.message" placeholder="请输入内容" style="width: 500px"></el-input>
+                        <el-input v-model="ruleForm.message" placeholder="请输入内容" style="width: 500px"></el-input>
                     </el-form-item>
                     <el-form-item>
-                        <el-button type="primary" @click="">发送</el-button>
+                        <el-button type="primary" @click="add('ruleForm')">发送</el-button>
                     </el-form-item>
                 </el-form>
             </div>
@@ -132,7 +132,7 @@
                             type="text"
                             size="small"
                             class="blueBug"
-                            @click="edit(scope.row)"
+                            @click="edit(scope.row.id)"
                     >修改
                     </el-button>
 
@@ -165,7 +165,6 @@
 <!-- 引入axios -->
 <script src="../../plugins/axios/axios.min.js"></script>
 <script src="../../js/request.js"></script>
-<script src="../../js/validate.js"></script>
 <script src="../../js/index.js"></script>
 <script src="../../api/comment.js"></script>
 
@@ -180,9 +179,6 @@
                 },
                 tableData: [],
                 dialogVisible: false,
-                formInline: {
-                    message : ''
-                },
                 counts: 0,
                 page: 1,
                 pageSize: 10,
@@ -234,12 +230,15 @@
                         return false
                     }
                 })
-                const temporaryData =this.temporaryData
+                const Data =this.temporaryData
                 if(this.actionType === 'edit'){
-                    editMessage(temporaryData).then(res =>{
+                    editMessage(Data).then(res =>{
                         if(res.code === 1){
                             this.$message.success('修改成功！')
-                            this.temporaryData.dialogVisible = false
+                            this.dialogVisible = false
+                            this.ruleForm = {
+                                'message': ''
+                            }
                             this.handleQuery()
                         }else{
                             this.$message.error(res.msg || '操作失败')
@@ -248,12 +247,14 @@
                         this.$message('请求出错了：' + err)
                     })
                 }else {
-                    delete temporaryData.id
-
-                    addMessage(temporaryData).then(res =>{
+                    delete Data.id
+                    addMessage(Data).then(res =>{
                         if(res.code === 1){
                             this.$message.success('评论成功！')
-                            this.temporaryData.dialogVisible = false
+                            this.dialogVisible = false
+                            this.ruleForm = {
+                                'message': ''
+                            }
                             this.handleQuery()
                         }else{
                             this.$message.error(res.msg || '操作失败')
@@ -265,36 +266,31 @@
                 
             },
 
-            edit(dat){
+            edit(st){
                 this.dialogVisible = true
                 this.actionType = 'edit'
-                queryMessageById(dat.id).then(res =>{
+                queryMessageById(st).then(res =>{
                     if(String(res.code) === '1'){
                         this.ruleForm = { ...res.data }
                         this.ruleForm.message = res.data.message
-                        this.temporaryData.id = dat.id
+                        this.temporaryData.id = st
                         this.temporaryData.forumId = this.id
                     }
                 })
             },
 
             delete(st) {
-                this.$confirm('确认删除该评论, 是否继续?', '确定删除', {
-                    'confirmButtonText': '确定',
-                    'cancelButtonText': '取消',
-                }).then(() => {
-                    deleteMessage (st).then(res => {
+
+                deleteMessage(st).then(res => {
                         if (res.code === 1) {
                             this.$message.success('删除成功！')
                             this.handleQuery()
                         } else {
                             this.$message.error(res.msg || '操作失败')
                         }
-                    }).catch(err => {
-                        this.$message.error('请求出错了：' + err)
                     })
-                })
             },
+
             handleQuery() {
                 this.page = 1;
                 this.init();

@@ -67,10 +67,7 @@ public class CommentController {
     }
     @PutMapping
     private R<String> update(@RequestBody Comment comment){
-        Long id = comment.getId();
-        LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Comment::getId,id);
-        commentService.update(queryWrapper);
+        commentService.updateById(comment);
         return R.success("修改成功");
     }
     @DeleteMapping

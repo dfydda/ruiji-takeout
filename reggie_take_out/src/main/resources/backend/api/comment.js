@@ -15,7 +15,7 @@ const addMessage =(params) => {
     })
 }
 //删除接口
-const deleteMessage = (id) => {
+const deleteMessage =(id) => {
   return $axios({
       url: `/comment/${id}`,
       method: 'delete'
@@ -24,7 +24,7 @@ const deleteMessage = (id) => {
 //修改接口
 const editMessage =(params) =>{
     return $axios({
-        url:`/comment/${id}`,
+        url:`/comment`,
         method: 'put',
         data: { ...params}
     })

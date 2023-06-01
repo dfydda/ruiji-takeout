@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -36,7 +37,6 @@ public class CommonController {
     public R<String> upload(MultipartFile file){
         //file是一个临时文件，需要转存到指定位置，否则本次请求完成后临时文件会删除
         log.info(file.toString());
-
         //原始文件名
         String originalFilename = file.getOriginalFilename();//abc.jpg
         String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
