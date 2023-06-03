@@ -140,7 +140,7 @@
                             type="text"
                             size="small"
                             class="delBut non"
-                            @click="delete(scope.row.id)"
+                            @click="deleteText(scope.row.id)"
                     >删除
                     </el-button>
                 </template>
@@ -279,8 +279,7 @@
                 })
             },
 
-            delete(st) {
-
+            deleteText(st) {
                 deleteMessage(st).then(res => {
                         if (res.code === 1) {
                             this.$message.success('删除成功！')

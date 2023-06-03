@@ -113,6 +113,9 @@ public class ForumController {
     public R<Forum> getById(@PathVariable Long id){
         log.info("根据id查询文章信息...");
         Forum forum =forumService.getById(id);
+        int num = forum.getNumber();
+        forum.setNumber(num+1);
+        forumService.updateById(forum);
         if(forum != null){
             return R.success(forum);
         }
