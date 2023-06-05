@@ -14,8 +14,9 @@ import java.time.LocalDateTime;
  * 分类
  */
 @Data
+//如果需要序列化某个类的对象，实现Serializable
 public class Category implements Serializable {
-
+    //serialVersionUID序列化的版本号，可以提高兼容性
     private static final long serialVersionUID = 1L;
 
     private Long id;

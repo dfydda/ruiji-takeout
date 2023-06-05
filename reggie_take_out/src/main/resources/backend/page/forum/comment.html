@@ -126,9 +126,11 @@
                     label="操作"
                     width="160"
                     align="center"
+
             >
                 <template slot-scope="scope">
                     <el-button
+                            v-if="showButton"
                             type="text"
                             size="small"
                             class="blueBug"
@@ -137,6 +139,7 @@
                     </el-button>
 
                     <el-button
+                            v-if="showButton"
                             type="text"
                             size="small"
                             class="delBut non"
@@ -189,6 +192,8 @@
                     forumId: '',
                     message: '',
                 },
+                showButton: false,
+
             }
         },
         computed: {
@@ -204,7 +209,11 @@
                 this.init()
             }
         },
-        mounted(){},
+        mounted(){
+            setTimeout(() => {
+                this.showButton = false;
+            }, 60000); // 60秒后隐藏按钮
+        },
         methods: {
             async init(){
                 const params = {
@@ -262,6 +271,7 @@
                     }).catch(err =>{
                         this.$message('请求出错了：' + err)
                     })
+                    this.showButton = true
                 }
                 
             },
