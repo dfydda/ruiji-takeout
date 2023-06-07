@@ -67,12 +67,20 @@ public class CommentController {
     }
     @PutMapping
     private R<String> update(@RequestBody Comment comment){
-        commentService.updateById(comment);
-        return R.success("修改成功");
+        int status = commentService.getById(comment).getStatus();
+        if(status ==0){
+            commentService.updateById(comment);
+            return R.success("修改成功");
+        }
+        return R.error("禁止修改");
     }
     @DeleteMapping
     private R<String> delete(Long id){
+        int status = commentService.getById(id).getStatus();
+        if(status ==0){
         commentService.removeById(id);
         return R.success("删除成功");
+        }
+        return R.error("禁止删除");
     }
 }

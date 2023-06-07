@@ -13,6 +13,7 @@ public class Comment  implements Serializable {
     private Long id;
     private Long forumId;
     private String message;
+    private int status;
     @TableField(fill = FieldFill.INSERT)
     private Long createUser;
     @TableField(fill = FieldFill.INSERT)
