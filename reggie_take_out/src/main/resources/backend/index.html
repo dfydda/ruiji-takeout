@@ -70,6 +70,7 @@
           </el-scrollbar>
         </div>
         <div class="main-container">
+
           <!-- <navbar /> -->
           <div class="navbar">
             <div class="head-lable">
@@ -78,12 +79,21 @@
               >
               <span>{{headTitle}}</span>
             </div>
+
+
             <div class="right-menu">
-              <div class="avatar-wrapper">{{ userInfo.name }}</div>
+
+                <img style="margin-top: 20px;
+                            cursor: pointer;" src="images/time.png" @click="handleStatus"/>
+                <span >营业状态设置</span>
+
+<!--              <div class="avatar-wrapper">{{ userInfo.name }}</div>-->
               <!-- <div class="logout" @click="logout">退出</div> -->
               <img src="images/icons/btn_close@2x.png" class="outLogin" alt="退出" @click="logout" />
             </div>
           </div>
+
+
           <div class="app-main" v-loading="loading">
             <div class="divTmp" v-show="loading"></div>
             <iframe
@@ -172,7 +182,10 @@
             headTitle: '员工管理',
             goBackFlag: false,
             loading: true,
-            timer: null
+            timer: null,
+            status: 0,
+
+            dialogVisible: false,
           }
         },
         computed: {},
@@ -220,7 +233,14 @@
             this.timer = setTimeout(()=>{
               this.loading = false
             },1000)
+          },
+
+          handleStatus(){
+
           }
+
+
+
         }
       })
     </script>

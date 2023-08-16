@@ -61,7 +61,7 @@
   height: 64px;
   overflow: hidden;
   position: relative;
-  background: #fff;
+  background: #FFC200;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 }
 .navbar .hamburger-container {
@@ -98,12 +98,14 @@
 }
 
 .navbar .right-menu img {
-  margin-top: 20px;
+  margin-top: 10px;
   margin-left: 10px;
   width: 25px;
   height: 25px;
 }
 .navbar .right-menu .outLogin {
+  width: 40px;
+  height: 40px;
   cursor: pointer;
 }
 .navbar .right-menu:focus {
@@ -178,6 +180,48 @@
   height: 18px;
   float: left;
 }
+.navbar .statusBox {
+  position: relative;
+  width: 150px;
+  height: 64px;
+  float: left;
+  font-size: 19px;
+  line-height: 64px;
+  text-align: center;
+  margin-left: 600px;
+}
+.navbar .statusBox .open{
+  display: block;
+  border-radius: 8%;
+  background-color: #FFC200;
+}
+.navbar .statusBox .close{
+  display: block;
+  border-radius: 8%;
+  background-color: #fd3333;
+ }
+
+.navbar .status-menu {
+  position: relative;
+  width: 150px;
+  height: 64px;
+  float: left;
+  font-size: 15px;
+  line-height: 64px;
+  text-align: center;
+}
+.navbar .status-menu .rightStatus{
+  position: absolute;
+  top: 15%;
+  left: 10%;
+  height: 70%;
+  width: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8%;
+}
+
 @keyframes opacity {
   0% {
     opacity: 0;
