@@ -30,16 +30,19 @@
       <div class="app-wrapper openSidebar clearfix">
         <!-- sidebar -->
         <div class="sidebar-container">
-          <div class="logo">
+          <div class="logo" v-if="!isCollapse">
             <!-- <img src="images/logo.png" width="122.5" alt="" /> -->
-            <img src="images/login/login-logo.png" alt="" style="width: 117px; height: 32px" />
+            <img src="images/login/login-logo.png" alt="" style="width: 120px; height: 31px" />
+          </div>
+          <div v-else class="sidebar-logo-mini" style=" width: 190px;height: 148px;">
+            <img src="images/mini-logo.png" >
           </div>
 
+          <el-aside width="collapse">
           <el-scrollbar wrap-class="scrollbar-wrapper">
-            <el-menu
-              :default-active="defAct"
+            <el-menu :default-active="defAct"
               :unique-opened="false"
-              :collapse-transition="false"
+              :collapse="isCollapse"
               background-color="#343744"
               text-color="#bfcbd9"
               active-text-color="#f4f4f5"
@@ -68,15 +71,22 @@
               </div>
             </el-menu>
           </el-scrollbar>
+          </el-aside>
+
         </div>
         <div class="main-container">
 
           <!-- <navbar /> -->
           <div class="navbar" >
+            <div class="box_bgd" @click="isC" >
+              <!-- 点击展开收起导航和切换对应图标 -->
+              <i class="el-icon-s-fold" v-show="block" ></i>
+              <i class="el-icon-s-unfold" v-show="toggle" ></i>
+            </div>
+
             <div class="head-lable">
               <span v-if="goBackFlag" class="goBack" @click="goBack()"
-                ><img src="images/icons/btn_back@2x.png" alt="" /> 返回</span
-              >
+                ><img src="images/icons/btn_back@2x.png" alt="" /> 返回</span>
               <span>{{headTitle}}</span>
                 <el-tag v-if="setStatus === 1"
                         type="success"
@@ -90,7 +100,7 @@
             </div>
 
 
-            <div class="right-menu">
+            <div class="right-menu" style="float: right">
 
                 <img style="margin-top: 20px;" src="images/time.png" />
                 <span style="cursor: pointer;" @click="handleStatus">营业状态设置</span>
@@ -161,6 +171,7 @@
             menuActived: '2',
             userInfo: {},
             menuList: [
+                    //图标看iconfont.json
               // {
               //   id: '1',
               //   name: '门店管理',
@@ -205,11 +216,11 @@
                     id: '8',
                     name: '论坛管理',
                     url: 'page/forum/list.html',
-                    icon: 'icon-forum'
+                    icon: 'icon-order'
                   }
 
-                ],
-               },
+               //  ],
+               // },
             ],
             iframeUrl: 'page/member/list.html',
             headTitle: '员工管理',
@@ -217,10 +228,11 @@
             loading: true,
             timer: null,
 
-
             dialogVisible: false,
             setStatus: 0,
-            setStatus: 1,
+            isCollapse: false, //导航栏默认为展开
+            toggle: false, //第二个图标默认隐藏
+            block: true, //默认显示第一个图标
           }
         },
         computed: {},
@@ -246,6 +258,12 @@
           //改变营业状态，未写后端请求
           handleSave() {
             // this.setStatus = !this.setStatus;
+          },
+          // 动态控制展开与收起和切换对应图标
+          isC() {
+            this.isCollapse = !this.isCollapse;
+            this.toggle = !this.toggle;
+            this.block = !this.block;
           },
 
           logout() {
