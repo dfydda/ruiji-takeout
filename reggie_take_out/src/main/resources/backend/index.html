@@ -29,20 +29,22 @@
     <div class="app" id="app">
       <div class="app-wrapper openSidebar clearfix">
         <!-- sidebar -->
-        <div class="sidebar-container">
-          <div class="logo" v-if="!isCollapse">
+        <div class="sidebar-container" :style="{'width': isCollapse ? '70px' : '200px'}">
+          <div class="logo" v-if="!isCollapse" >
             <!-- <img src="images/logo.png" width="122.5" alt="" /> -->
             <img src="images/login/login-logo.png" alt="" style="width: 120px; height: 31px" />
           </div>
-          <div v-else class="sidebar-logo-mini" style=" width: 190px;height: 148px;">
-            <img src="images/mini-logo.png" >
+          <div v-else style="width: 70px;height: 148px;display: flex;justify-content: center;align-items: center;background-color: rgb(52, 55, 68);">
+            <img src="images/mini-logo.png" style="width: 60px;height: 60px;">
           </div>
 
-          <el-aside width="collapse">
+          <!--<el-aside width="auto">元素的宽度将根据其内容自动确定。-->
+          <el-aside width="auto">
           <el-scrollbar wrap-class="scrollbar-wrapper">
             <el-menu :default-active="defAct"
               :unique-opened="false"
               :collapse="isCollapse"
+              :collapse-transition="false"
               background-color="#343744"
               text-color="#bfcbd9"
               active-text-color="#f4f4f5"
@@ -74,7 +76,7 @@
           </el-aside>
 
         </div>
-        <div class="main-container">
+        <div class="main-container" :style="{'width': isCollapse ? 'calc(100% - 70px)' : 'calc(100% - 200px)'}">
 
           <!-- <navbar /> -->
           <div class="navbar" >
