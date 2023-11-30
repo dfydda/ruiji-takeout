@@ -92,9 +92,9 @@ public class UserController {
             String code = ValidateCodeUtils.generateValidateCode(4).toString();
             log.info("code={}", code);
             String test = "登录验证码为："+ code + "，有效时间为60s,欢迎登录app";
-            redisTemplate.opsForValue().set(phone, code, 1, TimeUnit.MINUTES);
               try {
                  // sendTestMail.sendTestMail(phone,test);
+                 redisTemplate.opsForValue().set(phone, code, 1, TimeUnit.MINUTES);
                 return R.success("手机验证码短信发送成功");
             } catch (MailException e) {
                 e.printStackTrace();

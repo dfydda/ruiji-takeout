@@ -33,22 +33,25 @@ public class JacksonObjectMapper extends ObjectMapper {
         //收到未知属性时不报异常
         this.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        //反序列化时，属性不存在的兼容处理
+        //反序列化时，属性不存在的兼容处理。反序列化时，遇到未知属性不报错。
         this.getDeserializationConfig().withoutFeatures(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
 
         SimpleModule simpleModule = new SimpleModule()
+                // 添加自定义的 LocalDateTime、LocalDate 和 LocalTime 的 Deserializer（反序列化器）
                 .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT)))
                 .addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT)))
                 .addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern(DEFAULT_TIME_FORMAT)))
-
+                // 添加 BigInteger 和 Long 类型的 ToStringSerializer，将它们转换为字符串形式。
                 .addSerializer(BigInteger.class, ToStringSerializer.instance)
                 .addSerializer(Long.class, ToStringSerializer.instance)
+                //添加自定义的 LocalDateTime、LocalDate 和 LocalTime 的 Serializer（序列化器），使用上面定义的默认格式进行序列化。
                 .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT)))
                 .addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT)))
                 .addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern(DEFAULT_TIME_FORMAT)));
 
-        //注册功能模块 例如，可以添加自定义序列化器和反序列化器
+        //注册功能模块 例如，可以添加自定义序列化器和反序列化器。
+        //使用 registerModule 方法注册 simpleModule 到 JacksonObjectMapper 中。这样，在序列化或反序列化时，就会使用这些自定义的序列化器和反序列化器。
         this.registerModule(simpleModule);
     }
 }
